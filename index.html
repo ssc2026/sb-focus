@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSC26 Premium Preparation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.4);
+            --bg-dark: #020617;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: #f1f5f9;
+            background-image: radial-gradient(circle at 50% -20%, #1e293b 0%, #020617 80%);
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 1.5rem;
+        }
+
+        .premium-border {
+            position: relative;
+            background: linear-gradient(var(--bg-dark), var(--bg-dark)) padding-box,
+                        linear-gradient(to right, #38bdf8, #818cf8) border-box;
+            border: 1px solid transparent;
+        }
+
+        .nav-active { 
+            color: var(--primary); 
+            text-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .page-section { display: none; }
+        .page-section.active { display: block; animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        #input-container.hidden { display: none; }
+        #input-container.show { display: flex; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="pb-28">
+    <div class="max-w-md mx-auto p-5 space-y-6">
+        <!-- Header -->
+        <header class="flex justify-between items-center py-6">
+            <div>
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-sky-500 rounded-full animate-pulse"></div>
+                    <h1 class="text-xl font-extrabold tracking-tight text-white">STUDY<span class="text-sky-500">PRO</span></h1>
+                </div>
+                <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-[0.2em] mt-1">SSC 2026 Dashboard</p>
+            </div>
+            <div class="glass-card px-4 py-2 flex items-center gap-3 border-l-4 border-sky-500">
+                <div class="text-right">
+                    <p class="text-[8px] text-slate-500 uppercase font-bold">Today's Focus</p>
+                    <span id="total-focus-display" class="text-xs font-black text-white">0h 0m</span>
+                </div>
+                <i class="fas fa-fire text-orange-500"></i>
+            </div>
+        </header>
+
+        <main>
+            <!-- Timer Section -->
+            <section id="timer" class="page-section active space-y-6">
+                
+                <!-- Notification Permission Button (Always visible for easy testing) -->
+                <div id="notif-permission-area">
+                    <button onclick="manualRequestPermission()" id="notif-btn" class="w-full py-3 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-sky-400 text-[10px] font-bold uppercase tracking-widest hover:bg-sky-500/20 transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-bell"></i> <span id="notif-btn-text">Enable Notifications</span>
+                    </button>
+                </div>
+
+                <div class="glass-card p-10 text-center relative overflow-hidden premium-border">
+                    <div class="relative z-10">
+                        <div id="timer-label" class="inline-block px-4 py-1 rounded-full bg-slate-900/50 border border-slate-800 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-8">
+                            Focus Session
+                        </div>
+                        
+                        <div class="relative w-56 h-56 mx-auto mb-10 flex items-center justify-center">
+                            <svg class="w-full h-full transform -rotate-90">
+                                <circle cx="112" cy="112" r="104" stroke="rgba(255,255,255,0.03)" stroke-width="4" fill="transparent" />
+                                <circle id="timer-circle" cx="112" cy="112" r="104" stroke="url(#timer-gradient)" stroke-width="8" fill="transparent" stroke-dasharray="653.4" stroke-dashoffset="0" stroke-linecap="round" class="transition-all duration-1000" />
+                                <defs>
+                                    <linearGradient id="timer-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#38bdf8" />
+                                        <stop offset="100%" stop-color="#818cf8" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span id="timer-display" class="text-6xl font-black text-white tracking-tighter">25:00</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4 justify-center items-center">
+                            <button onclick="resetTimer()" class="w-12 h-12 rounded-2xl bg-slate-900/50 border border-slate-800 text-slate-400 hover:text-white transition">
+                                <i class="fas fa-redo-alt"></i>
+                            </button>
+                            <button id="timer-btn" onclick="toggleTimer()" class="h-16 px-10 rounded-3xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-lg shadow-[0_0_30_rgba(56,189,248,0.3)] transition-all active:scale-95 uppercase tracking-wide">
+                                START
+                            </button>
+                            <button onclick="toggleMute()" id="mute-btn" class="w-12 h-12 rounded-2xl bg-slate-900/50 border border-slate-800 text-slate-400 hover:text-white transition">
+                                <i class="fas fa-volume-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Break Ambiance Choice -->
+                <div id="break-ambiance-control" class="hidden opacity-0 transition-opacity duration-500 flex items-center justify-between glass-card px-5 py-4 border-l-4 border-sky-400">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-water text-sky-400 animate-pulse"></i>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-300">Play Alpha Waves?</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="setBreakAmbiance(true)" class="text-[10px] px-3 py-1 bg-sky-500 text-white rounded-lg font-bold hover:bg-sky-400 transition">YES</button>
+                        <button onclick="setBreakAmbiance(false)" class="text-[10px] px-3 py-1 bg-slate-800 text-slate-400 rounded-lg font-bold hover:bg-slate-700 transition">NO</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tasks Section -->
+            <section id="tasks" class="page-section space-y-4">
+                <div class="flex justify-between items-center mb-2 px-1">
+                    <h2 class="text-xl font-bold">Today's Missions</h2>
+                    <button onclick="toggleInput()" class="text-sky-500 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 bg-sky-500/10 px-3 py-1.5 rounded-lg border border-sky-500/20 active:scale-95 transition-all">
+                        <i class="fas fa-plus"></i> Add Mission
+                    </button>
+                </div>
+                
+                <div id="input-container" class="hidden glass-card p-2 gap-2 border border-sky-500/30 mb-4 overflow-hidden">
+                    <input id="task-input" type="text" placeholder="Mission name..." class="flex-1 bg-transparent border-none px-4 py-3 text-sm focus:outline-none text-white">
+                    <button onclick="addTask()" class="w-12 h-12 bg-sky-600 rounded-xl flex items-center justify-center hover:bg-sky-500 transition">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+
+                <div id="task-list" class="space-y-3"></div>
+            </section>
+
+            <!-- Stats Section -->
+            <section id="stats" class="page-section">
+                <div class="glass-card p-6 border-t-4 border-sky-500 space-y-6">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold">Study Insights</h3>
+                        <i class="fas fa-chart-line text-sky-500"></i>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                            <span>Mission Progress</span>
+                            <span id="progress-percent">0%</span>
+                        </div>
+                        <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                            <div id="progress-bar" class="h-full bg-gradient-to-r from-sky-500 to-blue-600 transition-all duration-700" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 bg-slate-900/50 rounded-2xl border border-slate-800">
+                            <p class="text-[10px] text-slate-500 font-bold uppercase mb-1">Sessions</p>
+                            <p id="session-count" class="text-xl font-black">0</p>
+                        </div>
+                        <div class="p-4 bg-slate-900/50 rounded-2xl border border-slate-800">
+                            <p class="text-[10px] text-slate-500 font-bold uppercase mb-1">Status</p>
+                            <p id="study-status" class="text-sm font-black text-sky-400 tracking-tight">Idle</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm glass-card p-2 flex justify-around items-center z-50 border border-white/10 shadow-2xl">
+            <button onclick="showSection('tasks')" id="nav-tasks" class="w-12 h-12 rounded-xl flex items-center justify-center text-slate-500 transition-all"><i class="fas fa-tasks"></i></button>
+            <button onclick="showSection('timer')" id="nav-timer" class="nav-active w-12 h-12 rounded-xl flex items-center justify-center transition-all"><i class="fas fa-stopwatch"></i></button>
+            <button onclick="showSection('stats')" id="nav-stats" class="w-12 h-12 rounded-xl flex items-center justify-center text-slate-500 transition-all"><i class="fas fa-chart-bar"></i></button>
+        </nav>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="ui-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
+    <audio id="alarm-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <audio id="break-waves" src="https://www.soundjay.com/nature/ocean-waves-1.mp3" loop preload="auto"></audio>
+
+    <script>
+        let state = {
+            tasks: JSON.parse(localStorage.getItem('ssc26_tasks')) || [],
+            focusSeconds: JSON.parse(localStorage.getItem('ssc26_focus_sec')) || 0,
+            sessions: JSON.parse(localStorage.getItem('ssc26_sessions')) || 0,
+            date: localStorage.getItem('ssc26_date') || new Date().toDateString()
+        };
+
+        let timerInterval = null;
+        let timeLeft = 25 * 60;
+        let isRunning = false;
+        let mode = 'study';
+        let isMuted = false;
+        let isAudioUnlocked = false;
+        let useBreakAmbiance = false;
+
+        // --- Audio Logic ---
+        function unlockAudio() {
+            if (isAudioUnlocked) return;
+            const audios = [
+                document.getElementById('ui-click'),
+                document.getElementById('alarm-sound'),
+                document.getElementById('break-waves')
+            ];
+            audios.forEach(a => {
+                a.volume = 0;
+                a.play().then(() => {
+                    a.pause();
+                    a.currentTime = 0;
+                }).catch(() => {});
+            });
+            isAudioUnlocked = true;
+        }
+
+        function playClickSound() {
+            if (isMuted) return;
+            const click = document.getElementById('ui-click');
+            click.volume = 0.12; 
+            click.currentTime = 0;
+            click.play().catch(() => {});
+        }
+
+        function playAlarmSound() {
+            if (isMuted) return;
+            const alarm = document.getElementById('alarm-sound');
+            alarm.volume = 0.28;
+            alarm.currentTime = 0;
+            alarm.play().catch(() => {});
+        }
+
+        function manageBreakAmbiance() {
+            const waves = document.getElementById('break-waves');
+            if (mode === 'break' && isRunning && useBreakAmbiance && !isMuted) {
+                waves.volume = 0.18;
+                waves.play().catch(() => {});
+            } else {
+                waves.pause();
+                waves.currentTime = 0;
+            }
+        }
+
+        function setBreakAmbiance(choice) {
+            useBreakAmbiance = choice;
+            const control = document.getElementById('break-ambiance-control');
+            control.classList.add('opacity-0');
+            setTimeout(() => control.classList.add('hidden'), 500);
+            manageBreakAmbiance();
+        }
+
+        // --- Notification Logic ---
+        function manualRequestPermission() {
+            if (!("Notification" in window)) {
+                alert("This browser does not support notifications.");
+                return;
+            }
+            
+            Notification.requestPermission().then(permission => {
+                checkNotifUI();
+            });
+        }
+
+        function checkNotifUI() {
+            const btn = document.getElementById('notif-btn');
+            const btnText = document.getElementById('notif-btn-text');
+            
+            if (!("Notification" in window)) {
+                document.getElementById('notif-permission-area').classList.add('hidden');
+                return;
+            }
+
+            if (Notification.permission === "granted") {
+                btnText.innerText = "Notifications Enabled";
+                btn.classList.replace('text-sky-400', 'text-emerald-400');
+                btn.classList.replace('bg-sky-500/10', 'bg-emerald-500/10');
+                btn.classList.replace('border-sky-500/20', 'border-emerald-500/20');
+                // Auto hide after a few seconds if granted
+                setTimeout(() => {
+                    document.getElementById('notif-permission-area').classList.add('hidden');
+                }, 3000);
+            } else if (Notification.permission === "denied") {
+                btnText.innerText = "Notifications Blocked";
+                btn.classList.replace('text-sky-400', 'text-rose-400');
+                btn.classList.replace('bg-sky-500/10', 'bg-rose-500/10');
+                btn.classList.replace('border-sky-500/20', 'border-rose-500/20');
+            }
+        }
+
+        function sendSystemNotification(title, body) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                try {
+                    new Notification(title, {
+                        body: body,
+                        icon: "https://cdn-icons-png.flaticon.com/512/1048/1048953.png"
+                    });
+                } catch(e) {
+                    console.error("Notification error:", e);
+                }
+            }
+        }
+
+        function updateUI() {
+            const m = Math.floor(timeLeft / 60);
+            const s = timeLeft % 60;
+            document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            
+            const total = mode === 'study' ? 25 * 60 : 5 * 60;
+            const offset = 653.4 - (timeLeft / total) * 653.4;
+            document.getElementById('timer-circle').style.strokeDashoffset = offset;
+
+            const totalFocusMin = Math.floor(state.focusSeconds / 60);
+            const h = Math.floor(totalFocusMin / 60);
+            const min = totalFocusMin % 60;
+            document.getElementById('total-focus-display').innerText = `${h}h ${min}m`;
+
+            document.getElementById('session-count').innerText = state.sessions;
+            document.getElementById('study-status').innerText = isRunning ? (mode === 'study' ? 'Studying' : 'On Break') : 'Idle';
+
+            const btn = document.getElementById('timer-btn');
+            if (!isRunning) {
+                if (timeLeft <= 0) {
+                    btn.innerText = (mode === 'study') ? 'START BREAK' : 'START STUDY';
+                } else if (timeLeft === (mode === 'study' ? 25*60 : 5*60)) {
+                    btn.innerText = 'START';
+                } else {
+                    btn.innerText = 'RESUME';
+                }
+            } else {
+                btn.innerText = 'PAUSE';
+            }
+
+            if(state.tasks.length > 0) {
+                const completed = state.tasks.filter(t => t.done).length;
+                const percent = Math.round((completed / state.tasks.length) * 100);
+                document.getElementById('progress-bar').style.width = `${percent}%`;
+                document.getElementById('progress-percent').innerText = `${percent}%`;
+            } else {
+                document.getElementById('progress-bar').style.width = `0%`;
+                document.getElementById('progress-percent').innerText = `0%`;
+            }
+        }
+
+        function toggleTimer() {
+            unlockAudio();
+            playClickSound();
+
+            const btn = document.getElementById('timer-btn');
+            if (isRunning) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                isRunning = false;
+                btn.classList.replace('bg-rose-600', 'bg-sky-600');
+            } else {
+                isRunning = true;
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    if (mode === 'study') state.focusSeconds++;
+                    updateUI();
+                    if (state.focusSeconds % 10 === 0) saveState();
+                    if (timeLeft <= 0) completeSession();
+                }, 1000);
+                btn.classList.replace('bg-sky-600', 'bg-rose-600');
+            }
+            manageBreakAmbiance();
+            updateUI();
+        }
+
+        function completeSession() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            isRunning = false;
+            
+            playAlarmSound();
+
+            if (mode === 'study') {
+                sendSystemNotification("Study Complete", "Break time has started");
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                state.sessions++;
+                mode = 'break';
+                timeLeft = 5 * 60;
+                document.getElementById('timer-label').innerText = "Short Break";
+                
+                const control = document.getElementById('break-ambiance-control');
+                control.classList.remove('hidden');
+                setTimeout(() => control.classList.remove('opacity-0'), 10);
+            } else {
+                sendSystemNotification("Break Over", "Time to start studying again");
+                mode = 'study';
+                timeLeft = 25 * 60;
+                document.getElementById('timer-label').innerText = "Focus Session";
+                document.getElementById('break-ambiance-control').classList.add('hidden');
+            }
+
+            document.getElementById('timer-btn').classList.replace('bg-rose-600', 'bg-sky-600');
+            saveState();
+            manageBreakAmbiance();
+            updateUI();
+        }
+
+        function resetTimer() {
+            if(timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+            isRunning = false;
+            timeLeft = mode === 'study' ? 25 * 60 : 5 * 60;
+            document.getElementById('timer-btn').classList.replace('bg-rose-600', 'bg-sky-600');
+            manageBreakAmbiance();
+            updateUI();
+        }
+
+        // --- Task Functions ---
+        function toggleInput() {
+            const container = document.getElementById('input-container');
+            container.classList.toggle('hidden');
+            container.classList.toggle('show');
+            if(!container.classList.contains('hidden')) document.getElementById('task-input').focus();
+        }
+
+        function addTask() {
+            const input = document.getElementById('task-input');
+            const text = input.value.trim();
+            if (text) {
+                state.tasks.push({ id: Date.now(), text: text, done: false });
+                input.value = '';
+                toggleInput();
+                saveState();
+                renderTasks();
+                updateUI();
+            }
+        }
+
+        function toggleTask(id) {
+            state.tasks = state.tasks.map(t => t.id === id ? {...t, done: !t.done} : t);
+            saveState();
+            renderTasks();
+            updateUI();
+        }
+
+        function deleteTask(id) {
+            state.tasks = state.tasks.filter(t => t.id !== id);
+            saveState();
+            renderTasks();
+            updateUI();
+        }
+
+        function renderTasks() {
+            const list = document.getElementById('task-list');
+            if (state.tasks.length === 0) {
+                list.innerHTML = `<div class="text-center py-10 text-slate-600 text-[10px] tracking-widest uppercase">No active missions</div>`;
+                return;
+            }
+
+            list.innerHTML = state.tasks.map(t => `
+                <div class="glass-card p-4 flex items-center justify-between group border border-transparent hover:border-sky-500/20 transition-all">
+                    <div class="flex items-center gap-3">
+                        <button onclick="toggleTask(${t.id})" class="w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${t.done ? 'bg-sky-500 border-sky-500' : 'border-slate-700'}">
+                            ${t.done ? '<i class="fas fa-check text-[10px]"></i>' : ''}
+                        </button>
+                        <span class="text-sm font-medium ${t.done ? 'line-through text-slate-600' : 'text-slate-200'}">${t.text}</span>
+                    </div>
+                    <button onclick="deleteTask(${t.id})" class="text-slate-700 hover:text-rose-500 transition-opacity opacity-0 group-hover:opacity-100">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            document.getElementById('mute-btn').innerHTML = isMuted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+            manageBreakAmbiance();
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('nav-active'));
+            document.getElementById(id).classList.add('active');
+            document.getElementById(`nav-${id}`).classList.add('nav-active');
+            if(id === 'tasks') renderTasks();
+            updateUI();
+        }
+
+        function saveState() {
+            localStorage.setItem('ssc26_tasks', JSON.stringify(state.tasks));
+            localStorage.setItem('ssc26_focus_sec', state.focusSeconds);
+            localStorage.setItem('ssc26_sessions', state.sessions);
+            localStorage.setItem('ssc26_date', state.date);
+        }
+
+        window.onload = () => {
+            if (state.date !== new Date().toDateString()) {
+                state.focusSeconds = 0;
+                state.sessions = 0;
+                state.date = new Date().toDateString();
+                saveState();
+            }
+            checkNotifUI();
+            renderTasks();
+            updateUI();
+        };
+    </script>
+</body>
+</html>
+
