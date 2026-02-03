@@ -1,584 +1,632 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SSC26 Premium Preparation</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-        :root { --primary: #38bdf8; --primary-glow: rgba(56, 189, 248, 0.4); --bg-dark: #020617; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-dark); color: #f1f5f9; background-image: radial-gradient(circle at 50% -20%, #1e293b 0%, #020617 80%); min-height: 100vh; margin: 0; padding: 0; overflow-x: hidden; }
-        .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border-radius: 1.5rem; }
-        .premium-border { position: relative; background: linear-gradient(var(--bg-dark), var(--bg-dark)) padding-box, linear-gradient(to right, #38bdf8, #818cf8) border-box; border: 1px solid transparent; }
-        .nav-active { color: var(--primary) !important; text-shadow: 0 0 15px var(--primary-glow); }
-        .page-section { display: none; }
-        .page-section.active { display: block; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .bottom-nav-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; z-index: 9999; }
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
+    <title>SSC26 Premium Preparation</title>  
+    <script src="https://cdn.tailwindcss.com"></script>  
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>  
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">  
+    <style>  
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');  
+        :root { --primary: #38bdf8; --primary-glow: rgba(56, 189, 248, 0.4); --bg-dark: #020617; }  
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-dark); color: #f1f5f9; background-image: radial-gradient(circle at 50% -20%, #1e293b 0%, #020617 80%); min-height: 100vh; margin: 0; padding: 0; overflow-x: hidden; }  
+        .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border-radius: 1.5rem; }  
+        .premium-border { position: relative; background: linear-gradient(var(--bg-dark), var(--bg-dark)) padding-box, linear-gradient(to right, #38bdf8, #818cf8) border-box; border: 1px solid transparent; }  
+        .nav-active { color: var(--primary) !important; text-shadow: 0 0 15px var(--primary-glow); }  
+        .page-section { display: none; }  
+        .page-section.active { display: block; animation: slideUp 0.3s ease-out; }  
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }  
+        .bottom-nav-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; z-index: 9999; }  .chart-container { height: 160px; display: flex; align-items: flex-end; gap: 4px; padding: 10px 5px; width: 100%; border-bottom: 2px solid rgba(56, 189, 248, 0.1); }  
+    .chart-bar-wrapper { flex: 1; height: 100%; display: flex; align-items: flex-end; justify-content: center; position: relative; }  
+    .chart-bar { width: 100%; background: rgba(56, 189, 248, 0.1); border-radius: 4px 4px 2px 2px; transition: all 0.2s ease; cursor: pointer; position: relative; min-height: 2px; }  
+    .chart-bar.highlighted { background: rgba(56, 189, 248, 0.5); transform: scaleX(1.1); }  
+    .chart-bar.active {   
+        background: linear-gradient(to top, #0ea5e9, #38bdf8);   
+        box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);  
+    }  
+
+    .custom-slider { -webkit-appearance: none; width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; outline: none; margin: 20px 0; }  
+    .custom-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: #38bdf8; border-radius: 50%; cursor: pointer; border: 3px solid #020617; box-shadow: 0 0 10px var(--primary-glow); }  
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; }  
+    .modal-content { max-width: 350px; width: 100%; animation: modalZoom 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }  
+    @keyframes modalZoom { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }  
+</style>
+
+</head>  
+<body class="pb-32">  
+    <!-- Modal for Detailed Stats -->  
+    <div id="stats-modal" class="modal-overlay" onclick="closeStatsModal()">  
+        <div class="modal-content glass-card p-6 border-t-4 border-sky-500" onclick="event.stopPropagation()">  
+            <div class="flex justify-between items-start mb-6">  
+                <div>  
+                    <h3 id="modal-date" class="text-lg font-bold text-white">Date</h3>  
+                    <p class="text-[10px] text-sky-400 font-bold uppercase tracking-widest">Daily History Summary</p>  
+                </div>  
+                <button onclick="closeStatsModal()" class="text-slate-500 hover:text-white"><i class="fas fa-times text-xl"></i></button>  
+            </div>  
+            <div id="modal-body-content" class="space-y-6">  
+                <!-- Data injected by JS -->  
+            </div>  
+        </div>  
+    </div>  <!-- Modal for Settings -->  
+<div id="settings-modal" class="modal-overlay" onclick="closeSettingsModal()">  
+    <div class="modal-content glass-card p-6 border-t-4 border-sky-500" onclick="event.stopPropagation()">  
+        <div class="flex justify-between items-start mb-6">  
+            <div>  
+                <h3 class="text-lg font-bold text-white">Timer Config</h3>  
+                <p class="text-[10px] text-sky-400 font-bold uppercase tracking-widest">Personalize Session</p>  
+            </div>  
+            <button onclick="closeSettingsModal()" class="text-slate-500 hover:text-white"><i class="fas fa-times text-xl"></i></button>  
+        </div>  
+        <div class="space-y-6">  
+            <div>  
+                <label class="text-[10px] text-slate-500 font-bold uppercase block mb-2">Study Minutes</label>  
+                <input type="number" id="study-min-input" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-sky-500">  
+            </div>  
+            <div>  
+                <label class="text-[10px] text-slate-500 font-bold uppercase block mb-2">Break Minutes</label>  
+                <input type="number" id="break-min-input" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-sky-500">  
+            </div>  
+            <button onclick="saveSettings()" class="w-full py-3 bg-sky-600 rounded-xl text-white font-bold uppercase text-xs tracking-widest">Save Config</button>  
+        </div>  
+    </div>  
+</div>  
+
+<!-- Audio Elements -->  
+<audio id="click-sound" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>  
+<audio id="end-sound" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>  
+
+<div class="max-w-md mx-auto p-5 space-y-6">  
+    <!-- Header -->  
+    <header class="flex justify-between items-center py-6">  
+        <div>  
+            <div class="flex items-center gap-2">  
+                <div class="w-2 h-2 bg-sky-500 rounded-full animate-pulse"></div>  
+                <h1 class="text-xl font-extrabold text-white">STUDY<span class="text-sky-500">PRO</span></h1>  
+            </div>  
+            <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-widest">SSC 2026</p>  
+        </div>  
+        <div class="flex items-center gap-2">  
+            <div class="glass-card px-4 py-2 flex items-center gap-3 border-l-4 border-sky-500">  
+                <button onclick="openSettingsModal()" class="w-8 h-8 rounded-full bg-sky-500/10 flex items-center justify-center text-sky-500 hover:bg-sky-500/20 transition-all">  
+                    <i class="fas fa-cog text-xs"></i>  
+                </button>  
+                <div class="text-right">  
+                    <p class="text-[8px] text-slate-500 uppercase font-bold">Today Focus</p>  
+                    <span id="total-focus-display" class="text-xs font-black text-white">0h 0m</span>  
+                    <p id="streak-display" class="text-[9px] font-bold text-orange-400 mt-0.5 hidden"></p>  
+                </div>  
+            </div>  
+        </div>  
+    </header>  
+
+    <main id="app-content">  
+        <section id="timer" class="page-section active space-y-6">  
+            <div class="glass-card p-10 text-center premium-border">  
+                <div id="timer-label" class="inline-block px-4 py-1 rounded-full bg-slate-900/50 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-8">Focus Session</div>  
+                <div class="relative w-56 h-56 mx-auto mb-10 flex items-center justify-center">  
+                    <svg class="w-full h-full transform -rotate-90">  
+                        <circle cx="112" cy="112" r="104" stroke="rgba(255,255,255,0.03)" stroke-width="4" fill="transparent" />  
+                        <circle id="timer-circle" cx="112" cy="112" r="104" stroke="url(#timer-gradient)" stroke-width="8" fill="transparent" stroke-dasharray="653.4" stroke-dashoffset="0" stroke-linecap="round" class="transition-all duration-1000" />  
+                        <defs><linearGradient id="timer-gradient"><stop offset="0%" stop-color="#38bdf8" /><stop offset="100%" stop-color="#818cf8" /></linearGradient></defs>  
+                    </svg>  
+                    <div class="absolute inset-0 flex flex-col items-center justify-center px-4">  
+                        <span id="timer-display" class="text-5xl sm:text-6xl font-black text-white truncate w-full">25:00</span>  
+                    </div>  
+                </div>  
+                <div class="flex flex-col gap-4 items-center">  
+                    <div class="flex gap-3 justify-center items-center">  
+                        <button onclick="resetTimer()" class="w-12 h-12 rounded-2xl bg-slate-900/50 border border-slate-800 text-slate-400" title="Reset"><i class="fas fa-redo-alt"></i></button>  
+                        <button id="timer-btn" onclick="toggleTimer()" class="h-16 px-10 rounded-3xl bg-sky-600 text-white font-bold text-lg uppercase shadow-lg shadow-sky-900/20">START</button>  
+                        <button onclick="toggleMute()" class="w-12 h-12 rounded-2xl bg-slate-900/50 border border-slate-800 text-slate-400"><i id="mute-icon" class="fas fa-volume-up"></i></button>  
+                    </div>  
+                    <button id="add-5m-btn" onclick="addFiveMinutes()" class="px-6 py-2 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-500 text-[10px] font-black tracking-widest uppercase hover:bg-sky-500/20 transition-all" title="Add 5 min">+5 Minutes</button>  
+                </div>  
+            </div>  
+
+            <div id="break-controls" class="hidden space-y-3">  
+                <div class="glass-card px-5 py-4 border-l-4 border-emerald-500 bg-emerald-500/5 flex items-center gap-3">  
+                    <i class="fas fa-coffee text-emerald-400"></i>  
+                    <span class="text-[10px] font-bold uppercase text-emerald-200">Break Active</span>  
+                </div>  
+                <button onclick="cancelBreak()" class="w-full py-3.5 glass-card border border-rose-500/30 text-rose-400 text-[10px] font-bold uppercase">Cancel Break</button>  
+            </div>  
+        </section>  
+
+        <section id="tasks" class="page-section space-y-4">  
+            <div class="flex justify-between items-center mb-2 px-1">  
+                <h2 class="text-xl font-bold">Daily Missions</h2>  
+                <button onclick="toggleInput()" class="text-sky-500 text-[10px] font-bold uppercase bg-sky-500/10 px-3 py-1.5 rounded-lg">Add Mission</button>  
+            </div>  
+            <div id="input-container" class="hidden glass-card p-1.5 flex items-center gap-2 border border-sky-500/30 mb-4">  
+                <input id="task-input" type="text" placeholder="Mission name..." class="flex-1 bg-transparent px-4 py-2 text-sm focus:outline-none text-white h-11">  
+                <button onclick="addTask()" class="w-11 h-11 bg-sky-600 rounded-xl flex items-center justify-center"><i class="fas fa-check text-white"></i></button>  
+            </div>  
+            <div id="task-list" class="space-y-3"></div>  
+        </section>  
+
+        <section id="stats" class="page-section space-y-6">  
+            <div class="glass-card p-6 border-t-4 border-sky-500">  
+                <div class="flex justify-between items-center mb-2">  
+                    <h3 class="font-bold text-sm">Last 30 Days Activity</h3>  
+                    <div id="selected-date-label" class="text-[10px] text-sky-400 font-bold uppercase">Today</div>  
+                </div>  
+                <div id="study-graph" class="chart-container"></div>  
+                <input type="range" id="graph-slider" min="0" max="29" value="29" class="custom-slider">  
+                <div class="flex justify-between px-1 -mt-2 mb-4">  
+                    <span class="text-[8px] text-slate-600 font-bold uppercase">30 Days Ago</span>  
+                    <span class="text-[8px] text-sky-500 font-bold uppercase">Today</span>  
+                </div>  
+                <div id="day-summary" class="bg-slate-900/40 rounded-xl p-3 border border-slate-800 flex items-center justify-between">  
+                    <div class="flex items-center gap-3">  
+                        <i class="fas fa-clock text-sky-500 text-xs"></i>  
+                        <div>  
+                            <p class="text-[8px] text-slate-500 uppercase font-bold">Focused Time</p>  
+                            <p id="selected-time-val" class="text-xs font-bold text-white">0h 0m</p>  
+                        </div>  
+                    </div>  
+                    <button onclick="openFullStats()" class="text-[8px] text-sky-400 font-bold uppercase bg-sky-400/10 px-2 py-1 rounded">Details</button>  
+                </div>  
+            </div>  
+            <div class="grid grid-cols-2 gap-4">  
+                <div class="glass-card p-4"><p class="text-[10px] text-slate-500 font-bold uppercase">Total Sessions</p><p id="session-count" class="text-xl font-black">0</p></div>  
+                <div class="glass-card p-4"><p class="text-[10px] text-slate-500 font-bold uppercase">Mission Progress</p><p id="progress-percent" class="text-xl font-black">0%</p></div>  
+            </div>  
+        </section>  
+    </main>  
+
+    <div class="bottom-nav-container">  
+        <nav class="glass-card p-2 flex justify-around items-center border border-white/10">  
+            <button onclick="showSection('tasks')" id="nav-tasks" class="w-14 h-14 rounded-xl text-slate-500"><i class="fas fa-tasks"></i></button>  
+            <button onclick="showSection('timer')" id="nav-timer" class="w-14 h-14 rounded-xl nav-active"><i class="fas fa-stopwatch"></i></button>  
+            <button onclick="showSection('stats')" id="nav-stats" class="w-14 h-14 rounded-xl text-slate-500"><i class="fas fa-chart-bar"></i></button>  
+        </nav>  
+    </div>  
+</div>  
+
+<script>  
+    // --- SETTINGS & STATE ---  
+    let SETTINGS = JSON.parse(localStorage.getItem('ssc26_settings')) || { studyMinutes: 25, breakMinutes: 5 };  
+    let state = {  
+        tasks: JSON.parse(localStorage.getItem('ssc26_tasks')) || [],  
+        totalFocusedMinutes: Number(localStorage.getItem('ssc26_focused_min')) || 0,  
+        accumulatedSeconds: Number(localStorage.getItem('ssc26_acc_sec')) || 0,   
+        sessions: Number(localStorage.getItem('ssc26_sessions')) || 0,  
+        date: localStorage.getItem('ssc26_date') || new Date().toDateString(),  
+        isMuted: JSON.parse(localStorage.getItem('ssc26_muted')) || false,  
+        streak: Number(localStorage.getItem('ssc26_streak')) || 0,  
+        lastStreakDate: localStorage.getItem('ssc26_last_streak_date') || null,  
+        dailyHistory: JSON.parse(localStorage.getItem('ssc26_daily_history')) || {}  
+    };  
+
+    // --- TIMER OBJECT ---  
+      let timer = {
+  isRunning: false,
+  endTime: null,
+  mode: 'study',
+  extraMinutes: 0,
+  duration: SETTINGS.studyMinutes * 60   // ✅ এই লাইনটাই missing ছিল
+};
+
+    let graphDates = [];  
+    let selectedIdx = 29;
+let sessionStartTimestamp = null;    
+    let sessionAccumulatedMs = 0;
+
+    function saveState() {  
+        localStorage.setItem('ssc26_timer', JSON.stringify({
+  endTime: timer.endTime,
+  isRunning: timer.isRunning,
+  mode: timer.mode,
+  extraMinutes: timer.extraMinutes
+}));
+        localStorage.setItem('ssc26_tasks', JSON.stringify(state.tasks));  
+        localStorage.setItem('ssc26_focused_min', state.totalFocusedMinutes);  
+        localStorage.setItem('ssc26_acc_sec', state.accumulatedSeconds);  
+        localStorage.setItem('ssc26_sessions', state.sessions);  
+        localStorage.setItem('ssc26_date', state.date);  
+        localStorage.setItem('ssc26_streak', state.streak);  
+        localStorage.setItem('ssc26_last_streak_date', state.lastStreakDate);  
+        localStorage.setItem('ssc26_daily_history', JSON.stringify(state.dailyHistory));  
+        localStorage.setItem('ssc26_settings', JSON.stringify(SETTINGS));  
+        localStorage.setItem('ssc26_muted', state.isMuted);  
+    }  
+
+    function playSound(id) { if(!state.isMuted) document.getElementById(id).play().catch(()=>{}); }  
+
+    function checkDayTransition() {  
+        const today = new Date().toDateString();  
+        if (state.date !== today) {  
+            syncDailyHistory(state.date);  
+            const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);  
+            if (state.totalFocusedMinutes < 25 && state.lastStreakDate !== today) {  
+                if (state.lastStreakDate !== yesterday.toDateString()) state.streak = 0;  
+            }  
+            state.totalFocusedMinutes = 0;  
+            state.accumulatedSeconds = 0;  
+            state.sessions = 0;  
+            state.date = today;  
+              
+            // Safety: Reset timer tracking if day changes mid-session  
+              
+              
+            saveState();  
+        }  
+        syncDailyHistory(today);  
+        updateUI();  
+    }  
+
+    function syncDailyHistory(dateStr) {  
+        state.dailyHistory[dateStr] = {  
+            minutes: dateStr === state.date ? state.totalFocusedMinutes : (state.dailyHistory[dateStr]?.minutes || 0),  
+            completedMissions: state.tasks.filter(t => t.done).map(t => t.text),  
+            pendingMissions: state.tasks.filter(t => !t.done).map(t => t.text)  
+        };  
+        saveState();  
+    }  
+
+    function updateStreak() {  
+        const today = new Date().toDateString();  
+        if (state.lastStreakDate === today) return;  
+        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);  
+        if (state.lastStreakDate === yesterday.toDateString()) state.streak++;  
+        else state.streak = 1;  
+        state.lastStreakDate = today;  
+        saveState();  
+    }  
+
+      
+
+    function tick() {
+    if (!timer.isRunning || !timer.endTime) return;
+
+    const now = Date.now();
+    const remainingMs = timer.endTime - now;
+    const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
+
+    timer.duration = remainingSec;
+
+    if (timer.mode === 'study') {
+        const totalPlanned =
+            timer.mode === 'study'
+                ? SETTINGS.studyMinutes * 60 + timer.extraMinutes
+                : SETTINGS.breakMinutes * 60;
+
+        const elapsed = totalPlanned - remainingSec;
+
         
-        .chart-container { height: 160px; display: flex; align-items: flex-end; gap: 4px; padding: 10px 5px; width: 100%; border-bottom: 2px solid rgba(56, 189, 248, 0.1); }
-        .chart-bar-wrapper { flex: 1; height: 100%; display: flex; align-items: flex-end; justify-content: center; position: relative; }
-        .chart-bar { width: 100%; background: rgba(56, 189, 248, 0.1); border-radius: 4px 4px 2px 2px; transition: all 0.2s ease; cursor: pointer; position: relative; min-height: 2px; }
-        .chart-bar.highlighted { background: rgba(56, 189, 248, 0.5); transform: scaleX(1.1); }
-        .chart-bar.active { 
-            background: linear-gradient(to top, #0ea5e9, #38bdf8); 
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
-        }
+        
+    }
 
-        .custom-slider { -webkit-appearance: none; width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; outline: none; margin: 20px 0; }
-        .custom-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: #38bdf8; border-radius: 50%; cursor: pointer; border: 3px solid #020617; box-shadow: 0 0 10px var(--primary-glow); }
+    if (remainingSec <= 0) {
+        completeSession();
+        return;
+    }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { max-width: 350px; width: 100%; animation: modalZoom 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        @keyframes modalZoom { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-    </style>
-</head>
-<body class="pb-32">
-    <!-- Modal for Detailed Stats -->
-    <div id="stats-modal" class="modal-overlay" onclick="closeStatsModal()">
-        <div class="modal-content glass-card p-6 border-t-4 border-sky-500" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-start mb-6">
-                <div>
-                    <h3 id="modal-date" class="text-lg font-bold text-white">Date</h3>
-                    <p class="text-[10px] text-sky-400 font-bold uppercase tracking-widest">Daily History Summary</p>
-                </div>
-                <button onclick="closeStatsModal()" class="text-slate-500 hover:text-white"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div id="modal-body-content" class="space-y-6">
-                <!-- Data injected by JS -->
-            </div>
-        </div>
-    </div>
+    updateUI();
+    requestAnimationFrame(tick);
+}  
+  function toggleTimer() {
+    playSound('click-sound');
 
-    <!-- Modal for Settings -->
-    <div id="settings-modal" class="modal-overlay" onclick="closeSettingsModal()">
-        <div class="modal-content glass-card p-6 border-t-4 border-sky-500" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-start mb-6">
-                <div>
-                    <h3 class="text-lg font-bold text-white">Timer Config</h3>
-                    <p class="text-[10px] text-sky-400 font-bold uppercase tracking-widest">Personalize Session</p>
-                </div>
-                <button onclick="closeSettingsModal()" class="text-slate-500 hover:text-white"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div class="space-y-6">
-                <div>
-                    <label class="text-[10px] text-slate-500 font-bold uppercase block mb-2">Study Minutes</label>
-                    <input type="number" id="study-min-input" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-sky-500">
-                </div>
-                <div>
-                    <label class="text-[10px] text-slate-500 font-bold uppercase block mb-2">Break Minutes</label>
-                    <input type="number" id="break-min-input" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-sky-500">
-                </div>
-                <button onclick="saveSettings()" class="w-full py-3 bg-sky-600 rounded-xl text-white font-bold uppercase text-xs tracking-widest">Save Config</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Audio Elements -->
-    <audio id="click-sound" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
-    <audio id="end-sound" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
-
-    <div class="max-w-md mx-auto p-5 space-y-6">
-        <!-- Header -->
-        <header class="flex justify-between items-center py-6">
-            <div>
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 bg-sky-500 rounded-full animate-pulse"></div>
-                    <h1 class="text-xl font-extrabold text-white">STUDY<span class="text-sky-500">PRO</span></h1>
-                </div>
-                <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-widest">SSC 2026</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <div class="glass-card px-4 py-2 flex items-center gap-3 border-l-4 border-sky-500">
-                    <button onclick="openSettingsModal()" class="w-8 h-8 rounded-full bg-sky-500/10 flex items-center justify-center text-sky-500 hover:bg-sky-500/20 transition-all">
-                        <i class="fas fa-cog text-xs"></i>
-                    </button>
-                    <div class="text-right">
-                        <p class="text-[8px] text-slate-500 uppercase font-bold">Today Focus</p>
-                        <span id="total-focus-display" class="text-xs font-black text-white">0h 0m</span>
-                        <p id="streak-display" class="text-[9px] font-bold text-orange-400 mt-0.5 hidden"></p>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <main id="app-content">
-            <section id="timer" class="page-section active space-y-6">
-                <div class="glass-card p-10 text-center premium-border">
-                    <div id="timer-label" class="inline-block px-4 py-1 rounded-full bg-slate-900/50 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-8">Focus Session</div>
-                    <div class="relative w-56 h-56 mx-auto mb-10 flex items-center justify-center">
-                        <svg class="w-full h-full transform -rotate-90">
-                            <circle cx="112" cy="112" r="104" stroke="rgba(255,255,255,0.03)" stroke-width="4" fill="transparent" />
-                            <circle id="timer-circle" cx="112" cy="112" r="104" stroke="url(#timer-gradient)" stroke-width="8" fill="transparent" stroke-dasharray="653.4" stroke-dashoffset="0" stroke-linecap="round" class="transition-all duration-1000" />
-                            <defs><linearGradient id="timer-gradient"><stop offset="0%" stop-color="#38bdf8" /><stop offset="100%" stop-color="#818cf8" /></linearGradient></defs>
-                        </svg>
-                        <div class="absolute inset-0 flex flex-col items-center justify-center px-4">
-                            <span id="timer-display" class="text-5xl sm:text-6xl font-black text-white truncate w-full">25:00</span>
-                        </div>
-                    </div>
-                    <div class="flex flex-col gap-4 items-center">
-                        <div class="flex gap-3 justify-center items-center">
-                            <button onclick="resetTimer()" class="w-12 h-12 rounded-2xl bg-slate-900/50 border border-slate-800 text-slate-400" title="Reset"><i class="fas fa-redo-alt"></i></button>
-                            <button id="timer-btn" onclick="toggleTimer()" class="h-16 px-10 rounded-3xl bg-sky-600 text-white font-bold text-lg uppercase shadow-lg shadow-sky-900/20">START</button>
-                            <button onclick="toggleMute()" class="w-12 h-12 rounded-2xl bg-slate-900/50 border border-slate-800 text-slate-400"><i id="mute-icon" class="fas fa-volume-up"></i></button>
-                        </div>
-                        <button id="add-5m-btn" onclick="addFiveMinutes()" class="px-6 py-2 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-500 text-[10px] font-black tracking-widest uppercase hover:bg-sky-500/20 transition-all" title="Add 5 min">+5 Minutes</button>
-                    </div>
-                </div>
-
-                <div id="break-controls" class="hidden space-y-3">
-                    <div class="glass-card px-5 py-4 border-l-4 border-emerald-500 bg-emerald-500/5 flex items-center gap-3">
-                        <i class="fas fa-coffee text-emerald-400"></i>
-                        <span class="text-[10px] font-bold uppercase text-emerald-200">Break Active</span>
-                    </div>
-                    <button onclick="cancelBreak()" class="w-full py-3.5 glass-card border border-rose-500/30 text-rose-400 text-[10px] font-bold uppercase">Cancel Break</button>
-                </div>
-            </section>
-
-            <section id="tasks" class="page-section space-y-4">
-                <div class="flex justify-between items-center mb-2 px-1">
-                    <h2 class="text-xl font-bold">Daily Missions</h2>
-                    <button onclick="toggleInput()" class="text-sky-500 text-[10px] font-bold uppercase bg-sky-500/10 px-3 py-1.5 rounded-lg">Add Mission</button>
-                </div>
-                <div id="input-container" class="hidden glass-card p-1.5 flex items-center gap-2 border border-sky-500/30 mb-4">
-                    <input id="task-input" type="text" placeholder="Mission name..." class="flex-1 bg-transparent px-4 py-2 text-sm focus:outline-none text-white h-11">
-                    <button onclick="addTask()" class="w-11 h-11 bg-sky-600 rounded-xl flex items-center justify-center"><i class="fas fa-check text-white"></i></button>
-                </div>
-                <div id="task-list" class="space-y-3"></div>
-            </section>
-
-            <section id="stats" class="page-section space-y-6">
-                <div class="glass-card p-6 border-t-4 border-sky-500">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="font-bold text-sm">Last 30 Days Activity</h3>
-                        <div id="selected-date-label" class="text-[10px] text-sky-400 font-bold uppercase">Today</div>
-                    </div>
-                    <div id="study-graph" class="chart-container"></div>
-                    <input type="range" id="graph-slider" min="0" max="29" value="29" class="custom-slider">
-                    <div class="flex justify-between px-1 -mt-2 mb-4">
-                        <span class="text-[8px] text-slate-600 font-bold uppercase">30 Days Ago</span>
-                        <span class="text-[8px] text-sky-500 font-bold uppercase">Today</span>
-                    </div>
-                    <div id="day-summary" class="bg-slate-900/40 rounded-xl p-3 border border-slate-800 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-clock text-sky-500 text-xs"></i>
-                            <div>
-                                <p class="text-[8px] text-slate-500 uppercase font-bold">Focused Time</p>
-                                <p id="selected-time-val" class="text-xs font-bold text-white">0h 0m</p>
-                            </div>
-                        </div>
-                        <button onclick="openFullStats()" class="text-[8px] text-sky-400 font-bold uppercase bg-sky-400/10 px-2 py-1 rounded">Details</button>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="glass-card p-4"><p class="text-[10px] text-slate-500 font-bold uppercase">Total Sessions</p><p id="session-count" class="text-xl font-black">0</p></div>
-                    <div class="glass-card p-4"><p class="text-[10px] text-slate-500 font-bold uppercase">Mission Progress</p><p id="progress-percent" class="text-xl font-black">0%</p></div>
-                </div>
-            </section>
-        </main>
-
-        <div class="bottom-nav-container">
-            <nav class="glass-card p-2 flex justify-around items-center border border-white/10">
-                <button onclick="showSection('tasks')" id="nav-tasks" class="w-14 h-14 rounded-xl text-slate-500"><i class="fas fa-tasks"></i></button>
-                <button onclick="showSection('timer')" id="nav-timer" class="w-14 h-14 rounded-xl nav-active"><i class="fas fa-stopwatch"></i></button>
-                <button onclick="showSection('stats')" id="nav-stats" class="w-14 h-14 rounded-xl text-slate-500"><i class="fas fa-chart-bar"></i></button>
-            </nav>
-        </div>
-    </div>
-
-    <script>
-        // --- SETTINGS & STATE ---
-        let SETTINGS = JSON.parse(localStorage.getItem('ssc26_settings')) || { studyMinutes: 25, breakMinutes: 5 };
-        let state = {
-            tasks: JSON.parse(localStorage.getItem('ssc26_tasks')) || [],
-            totalFocusedMinutes: Number(localStorage.getItem('ssc26_focused_min')) || 0,
-            accumulatedSeconds: Number(localStorage.getItem('ssc26_acc_sec')) || 0, 
-            sessions: Number(localStorage.getItem('ssc26_sessions')) || 0,
-            date: localStorage.getItem('ssc26_date') || new Date().toDateString(),
-            isMuted: JSON.parse(localStorage.getItem('ssc26_muted')) || false,
-            streak: Number(localStorage.getItem('ssc26_streak')) || 0,
-            lastStreakDate: localStorage.getItem('ssc26_last_streak_date') || null,
-            dailyHistory: JSON.parse(localStorage.getItem('ssc26_daily_history')) || {}
-        };
-
-        // --- TIMER OBJECT ---
-        let timer = { 
-            isRunning: false, 
-            lastTimestamp: null, 
-            duration: SETTINGS.studyMinutes * 60, 
-            mode: 'study', 
-            interval: null,
-            extraMinutes: 0
-        };
-
-        let graphDates = [];
-        let selectedIdx = 29;
-
-        function saveState() {
-            localStorage.setItem('ssc26_tasks', JSON.stringify(state.tasks));
-            localStorage.setItem('ssc26_focused_min', state.totalFocusedMinutes);
-            localStorage.setItem('ssc26_acc_sec', state.accumulatedSeconds);
-            localStorage.setItem('ssc26_sessions', state.sessions);
-            localStorage.setItem('ssc26_date', state.date);
-            localStorage.setItem('ssc26_streak', state.streak);
-            localStorage.setItem('ssc26_last_streak_date', state.lastStreakDate);
-            localStorage.setItem('ssc26_daily_history', JSON.stringify(state.dailyHistory));
-            localStorage.setItem('ssc26_settings', JSON.stringify(SETTINGS));
-            localStorage.setItem('ssc26_muted', state.isMuted);
-        }
-
-        function playSound(id) { if(!state.isMuted) document.getElementById(id).play().catch(()=>{}); }
-
-        function checkDayTransition() {
-            const today = new Date().toDateString();
-            if (state.date !== today) {
-                syncDailyHistory(state.date);
-                const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-                if (state.totalFocusedMinutes < 25 && state.lastStreakDate !== today) {
-                    if (state.lastStreakDate !== yesterday.toDateString()) state.streak = 0;
-                }
-                state.totalFocusedMinutes = 0;
-                state.accumulatedSeconds = 0;
-                state.sessions = 0;
-                state.date = today;
-                
-                // Safety: Reset timer tracking if day changes mid-session
-                if (timer.isRunning) {
-                    timer.lastTimestamp = Date.now();
-                }
-                
-                saveState();
-            }
-            syncDailyHistory(today);
-            updateUI();
-        }
-
-        function syncDailyHistory(dateStr) {
-            state.dailyHistory[dateStr] = {
-                minutes: dateStr === state.date ? state.totalFocusedMinutes : (state.dailyHistory[dateStr]?.minutes || 0),
-                completedMissions: state.tasks.filter(t => t.done).map(t => t.text),
-                pendingMissions: state.tasks.filter(t => !t.done).map(t => t.text)
-            };
-            saveState();
-        }
-
-        function updateStreak() {
-            const today = new Date().toDateString();
-            if (state.lastStreakDate === today) return;
-            const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-            if (state.lastStreakDate === yesterday.toDateString()) state.streak++;
-            else state.streak = 1;
-            state.lastStreakDate = today;
-            saveState();
-        }
-
-        function toggleTimer() {
-            playSound('click-sound');
-            checkDayTransition(); // Ensure day is correct before starting
-            if (timer.isRunning) { 
-                timer.isRunning = false; 
-                clearInterval(timer.interval);
-                timer.lastTimestamp = null;
-            }
-            else { 
-                timer.isRunning = true; 
-                timer.lastTimestamp = Date.now();
-                timer.interval = setInterval(tick, 1000); 
-            }
-            updateUI();
-        }
-
-        function tick() {
-            if (!timer.isRunning || !timer.lastTimestamp) return;
-
-            const now = Date.now();
-            let deltaMs = now - timer.lastTimestamp;
-            let deltaSecTotal = Math.floor(deltaMs / 1000);
-
-            if (deltaSecTotal >= 1) {
-                // Safety 1: Cap deltaSec to 5s to avoid visual glitching/large jumps
-                // but process all seconds in a loop for accuracy
-                const cappedDelta = Math.min(deltaSecTotal, 5); 
-                
-                // Update time reference
-                timer.lastTimestamp = now;
-
-                // Process time logic
-                for (let i = 0; i < cappedDelta; i++) {
-                    timer.duration -= 1;
-                    
-                    if (timer.mode === 'study') {
-                        state.accumulatedSeconds += 1;
-                        if (state.accumulatedSeconds >= 60) {
-                            state.totalFocusedMinutes += 1;
-                            state.accumulatedSeconds = 0;
-                            syncDailyHistory(state.date);
-                        }
-                    }
-
-                    if (timer.duration <= 0) {
-                        timer.duration = 0;
-                        clearInterval(timer.interval);
-                        completeSession();
-                        return; // Stop processing loop if session ends
-                    }
-                }
-                
-                updateUI();
-            }
-        }
-
-        function completeSession() {
-            playSound('end-sound');
-            timer.isRunning = false;
-            timer.lastTimestamp = null;
-            
-            if (timer.mode === 'study') {
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                state.sessions++;
-                updateStreak();
-                timer.mode = 'break';
-                timer.duration = SETTINGS.breakMinutes * 60;
-                timer.extraMinutes = 0;
-              if (window.Android) {
-  Android.studyFinished();
+    if (!timer.isRunning) {
+        // START বা RESUME
+        timer.isRunning = true;
+        
+        // SAFE GUARD: duration NaN হলে ঠিক করে দেবে
+if (!timer.duration || isNaN(timer.duration)) {
+    timer.duration = timer.mode === 'study'
+        ? SETTINGS.studyMinutes * 60
+        : SETTINGS.breakMinutes * 60;
 }
-            } else {
-                timer.mode = 'study';
-                timer.duration = SETTINGS.studyMinutes * 60;
-              if (window.Android) {
-  Android.breakFinished();
+
+        if (!sessionStartTimestamp && timer.mode === 'study') {
+            sessionStartTimestamp = Date.now();
+        }
+
+        timer.endTime = Date.now() + timer.duration * 1000;
+        requestAnimationFrame(tick);
+
+    } else {
+        // PAUSE
+        timer.isRunning = false;
+
+        if (timer.mode === 'study' && sessionStartTimestamp) {
+            sessionAccumulatedMs += Date.now() - sessionStartTimestamp;
+            sessionStartTimestamp = null;
+        }
+
+        timer.duration = Math.max(
+            0,
+            Math.ceil((timer.endTime - Date.now()) / 1000)
+        );
+
+        timer.endTime = null;
+        saveState();
+    }
+
+    updateUI();
 }
-            }
-            syncDailyHistory(state.date);
-            updateUI();
-        }
 
-        function resetTimer() {
-            playSound('click-sound');
-            clearInterval(timer.interval);
-            timer.isRunning = false;
-            timer.lastTimestamp = null;
-            timer.duration = timer.mode === 'study' ? SETTINGS.studyMinutes * 60 : SETTINGS.breakMinutes * 60;
-            timer.extraMinutes = 0;
-            updateUI();
-        }
 
-        function addFiveMinutes() {
-            if (timer.mode !== 'study') return;
-            playSound('click-sound');
-            timer.duration += 300;
-            timer.extraMinutes += 300;
-            updateUI();
-        }
+    function completeSession() {  
+        playSound('end-sound');  
+        timer.isRunning = false;  
+        if (timer.mode === 'study') {
+    if (sessionStartTimestamp) {
+        sessionAccumulatedMs += Date.now() - sessionStartTimestamp;
+        sessionStartTimestamp = null;
+    }
 
-        function cancelBreak() {
-            if (timer.mode !== 'break') return;
-            playSound('click-sound');
-            clearInterval(timer.interval);
-            timer.isRunning = false;
-            timer.lastTimestamp = null;
-            timer.mode = 'study';
-            timer.duration = SETTINGS.studyMinutes * 60;
-            timer.extraMinutes = 0;
-            updateUI();
-        }
+    const minutes = Math.floor(sessionAccumulatedMs / 60000);
+    state.totalFocusedMinutes += minutes;
+    sessionAccumulatedMs = 0;
+}
+          
+          
+        if (timer.mode === 'study') {  
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });  
+            state.sessions++;  
+            updateStreak();  
+            timer.mode = 'break';  
+            timer.duration = SETTINGS.breakMinutes * 60;  
+            timer.extraMinutes = 0;  
+          if (window.Android) {
 
-        function openSettingsModal() {
-            document.getElementById('study-min-input').value = SETTINGS.studyMinutes;
-            document.getElementById('break-min-input').value = SETTINGS.breakMinutes;
-            document.getElementById('settings-modal').style.display = 'flex';
-        }
+Android.studyFinished();
+}
+} else {
+timer.mode = 'study';
+timer.duration = SETTINGS.studyMinutes * 60;
+if (window.Android) {
+Android.breakFinished();
+}
+}
+syncDailyHistory(state.date);
+updateUI();
+}
 
-        function closeSettingsModal() { document.getElementById('settings-modal').style.display = 'none'; }
+function resetTimer() {  
+    sessionStartTimestamp = null;
+    sessionAccumulatedMs = 0;
+        playSound('click-sound');            
+        timer.isRunning = false;            
+        timer.duration = timer.mode === 'study' ? SETTINGS.studyMinutes * 60 : SETTINGS.breakMinutes * 60;  
+        timer.extraMinutes = 0;  
+        updateUI();  
+    }  
 
-        function saveSettings() {
-            const sm = parseInt(document.getElementById('study-min-input').value);
-            const bm = parseInt(document.getElementById('break-min-input').value);
-            if (sm > 0 && bm > 0) {
-                SETTINGS.studyMinutes = sm;
-                SETTINGS.breakMinutes = bm;
-                saveState();
-                resetTimer();
-                closeSettingsModal();
-            }
-        }
+    function addFiveMinutes() {  
+        if (timer.mode !== 'study') return;  
+        playSound('click-sound');  
+        timer.duration += 300;  
+        timer.extraMinutes += 300;  
+        updateUI();  
+    }  
 
-        function updateUI() {
-            updateTimerDisplay(timer.duration);
-            
-            document.getElementById('timer-label').innerText = timer.mode === 'study' ? "Focus Session" : "Short Break";
-            document.getElementById('timer-btn').innerText = timer.isRunning ? "PAUSE" : (timer.duration < (timer.mode === 'study' ? (SETTINGS.studyMinutes*60 + timer.extraMinutes) : SETTINGS.breakMinutes*60) ? "RESUME" : "START");
-            
-            document.getElementById('break-controls').classList.toggle('hidden', timer.mode !== 'break');
-            
-            const addBtn = document.getElementById('add-5m-btn');
-            addBtn.style.display = timer.mode === 'study' ? 'inline-block' : 'none';
+    function cancelBreak() {  
+        if (timer.mode !== 'break') return;  
+        playSound('click-sound');  
+          
+        timer.isRunning = false;  
+          
+        timer.mode = 'study';  
+        timer.duration = SETTINGS.studyMinutes * 60;  
+        timer.extraMinutes = 0;  
+        updateUI();  
+    }  
 
-            document.getElementById('total-focus-display').innerText = `${Math.floor(state.totalFocusedMinutes / 60)}h ${state.totalFocusedMinutes % 60}m`;
-            document.getElementById('session-count').innerText = state.sessions;
-            
-            const streakEl = document.getElementById('streak-display');
-            if (state.streak > 0) { streakEl.innerText = `🔥 ${state.streak} day streak`; streakEl.classList.remove('hidden'); }
-            else streakEl.classList.add('hidden');
-            
-            const doneCount = state.tasks.filter(t => t.done).length;
-            const percent = state.tasks.length ? Math.round((doneCount / state.tasks.length) * 100) : 0;
-            document.getElementById('progress-percent').innerText = percent + '%';
-            
-            document.getElementById('mute-icon').className = state.isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
-            saveState();
-        }
+    function openSettingsModal() {  
+        document.getElementById('study-min-input').value = SETTINGS.studyMinutes;  
+        document.getElementById('break-min-input').value = SETTINGS.breakMinutes;  
+        document.getElementById('settings-modal').style.display = 'flex';  
+    }  
 
-        function updateTimerDisplay(seconds) {
-            const m = Math.floor(seconds / 60); const s = seconds % 60;
-            document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-            
-            const max = timer.mode === 'study' ? (SETTINGS.studyMinutes * 60 + timer.extraMinutes) : (SETTINGS.breakMinutes * 60);
-            const offset = max > 0 ? 653.4 - (seconds / max) * 653.4 : 0;
-            document.getElementById('timer-circle').style.strokeDashoffset = offset;
-        }
+    function closeSettingsModal() { document.getElementById('settings-modal').style.display = 'none'; }  
 
-        function showSection(id) {
-            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('nav-active'));
-            document.getElementById(id).classList.add('active');
-            document.getElementById(`nav-${id}`).classList.add('nav-active');
-            if (id === 'tasks') renderTasks();
-            if (id === 'stats') { syncDailyHistory(state.date); initGraph(); }
-        }
+    function saveSettings() {  
+        const sm = parseInt(document.getElementById('study-min-input').value);  
+        const bm = parseInt(document.getElementById('break-min-input').value);  
+        if (sm > 0 && bm > 0) {  
+            SETTINGS.studyMinutes = sm;  
+            SETTINGS.breakMinutes = bm;  
+            saveState();  
+            resetTimer();  
+            closeSettingsModal();  
+        }  
+    }  
 
-        function toggleInput() { document.getElementById('input-container').classList.toggle('hidden'); }
-        
-        function addTask() {
-            const input = document.getElementById('task-input');
-            if (input.value.trim()) {
-                state.tasks.push({ id: Date.now(), text: input.value.trim(), done: false });
-                input.value = ''; toggleInput(); syncDailyHistory(state.date); renderTasks(); updateUI();
-            }
-        }
+    function updateUI() {  
+        updateTimerDisplay(timer.duration);  
+          
+        document.getElementById('timer-label').innerText = timer.mode === 'study' ? "Focus Session" : "Short Break";  
+        document.getElementById('timer-btn').innerText = timer.isRunning ? "PAUSE" : (timer.duration < (timer.mode === 'study' ? (SETTINGS.studyMinutes*60 + timer.extraMinutes) : SETTINGS.breakMinutes*60) ? "RESUME" : "START");  
+          
+        document.getElementById('break-controls').classList.toggle('hidden', timer.mode !== 'break');  
+          
+        const addBtn = document.getElementById('add-5m-btn');  
+        addBtn.style.display = timer.mode === 'study' ? 'inline-block' : 'none';  
 
-        function toggleTask(id) {
-            state.tasks = state.tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
-            syncDailyHistory(state.date); renderTasks(); updateUI();
-        }
+        document.getElementById('total-focus-display').innerText = `${Math.floor(state.totalFocusedMinutes / 60)}h ${state.totalFocusedMinutes % 60}m`;  
+        document.getElementById('session-count').innerText = state.sessions;  
+          
+        const streakEl = document.getElementById('streak-display');  
+        if (state.streak > 0) { streakEl.innerText = `🔥 ${state.streak} day streak`; streakEl.classList.remove('hidden'); }  
+        else streakEl.classList.add('hidden');  
+          
+        const doneCount = state.tasks.filter(t => t.done).length;  
+        const percent = state.tasks.length ? Math.round((doneCount / state.tasks.length) * 100) : 0;  
+        document.getElementById('progress-percent').innerText = percent + '%';  
+          
+        document.getElementById('mute-icon').className = state.isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';  
+        saveState();  
+    }  
 
-        function deleteTask(id) {
-            state.tasks = state.tasks.filter(t => t.id !== id);
-            syncDailyHistory(state.date); renderTasks(); updateUI();
-        }
+    function updateTimerDisplay(seconds) {  
+        const m = Math.floor(seconds / 60); const s = seconds % 60;  
+        document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;  
+          
+        const max = timer.mode === 'study' ? (SETTINGS.studyMinutes * 60 + timer.extraMinutes) : (SETTINGS.breakMinutes * 60);  
+        const offset = max > 0 ? 653.4 - (seconds / max) * 653.4 : 0;  
+        document.getElementById('timer-circle').style.strokeDashoffset = offset;  
+    }  
 
-        function renderTasks() {
-            const container = document.getElementById('task-list');
-            if (!state.tasks.length) { container.innerHTML = `<p class="text-center py-10 text-slate-600 text-[10px] uppercase font-bold tracking-widest">No Missions Set</p>`; return; }
-            container.innerHTML = state.tasks.map(t => `
-                <div class="glass-card p-4 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <button onclick="toggleTask(${t.id})" class="w-6 h-6 rounded-lg border-2 flex items-center justify-center ${t.done ? 'bg-sky-500 border-sky-500' : 'border-slate-700'}">
-                            ${t.done ? '<i class="fas fa-check text-[10px] text-white"></i>' : ''}
-                        </button>
-                        <span class="text-sm ${t.done ? 'line-through text-slate-600' : 'text-slate-200'}">${t.text}</span>
-                    </div>
-                    <button onclick="deleteTask(${t.id})" class="text-slate-700 hover:text-rose-500"><i class="fas fa-trash-alt"></i></button>
-                </div>
-            `).join('');
-        }
+    function showSection(id) {  
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));  
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('nav-active'));  
+        document.getElementById(id).classList.add('active');  
+        document.getElementById(`nav-${id}`).classList.add('nav-active');  
+        if (id === 'tasks') renderTasks();  
+        if (id === 'stats') { syncDailyHistory(state.date); initGraph(); }  
+    }  
 
-        function initGraph() {
-            graphDates = [];
-            for (let i = 29; i >= 0; i--) {
-                const d = new Date(); d.setDate(d.getDate() - i);
-                graphDates.push(d.toDateString());
-            }
-            renderGraph();
-            updateSelectedDay(29);
-        }
+    function toggleInput() { document.getElementById('input-container').classList.toggle('hidden'); }  
+      
+    function addTask() {  
+        const input = document.getElementById('task-input');  
+        if (input.value.trim()) {  
+            state.tasks.push({ id: Date.now(), text: input.value.trim(), done: false });  
+            input.value = ''; toggleInput(); syncDailyHistory(state.date); renderTasks(); updateUI();  
+        }  
+    }  
 
-        function renderGraph() {
-            const container = document.getElementById('study-graph');
-            container.innerHTML = '';
-            const values = graphDates.map(d => state.dailyHistory[d]?.minutes || 0);
-            const maxVal = Math.max(...values, 60);
-            
-            graphDates.forEach((date, i) => {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'chart-bar-wrapper';
-                const bar = document.createElement('div');
-                bar.id = `bar-${i}`;
-                bar.className = `chart-bar ${date === state.date ? 'active' : ''}`;
-                bar.style.height = `${Math.min((values[i] / maxVal) * 100, 100)}%`;
-                bar.onclick = () => { document.getElementById('graph-slider').value = i; updateSelectedDay(i); };
-                wrapper.appendChild(bar);
-                container.appendChild(wrapper);
-            });
-        }
+    function toggleTask(id) {  
+        state.tasks = state.tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);  
+        syncDailyHistory(state.date); renderTasks(); updateUI();  
+    }  
 
-        document.getElementById('graph-slider').addEventListener('input', (e) => {
-            updateSelectedDay(parseInt(e.target.value));
-        });
+    function deleteTask(id) {  
+        state.tasks = state.tasks.filter(t => t.id !== id);  
+        syncDailyHistory(state.date); renderTasks(); updateUI();  
+    }  
 
-        function updateSelectedDay(idx) {
-            selectedIdx = idx;
-            const dateStr = graphDates[idx];
-            const isToday = dateStr === state.date;
-            const data = state.dailyHistory[dateStr];
-            document.querySelectorAll('.chart-bar').forEach(b => b.classList.remove('highlighted'));
-            const bar = document.getElementById(`bar-${idx}`);
-            if(bar) bar.classList.add('highlighted');
-            document.getElementById('selected-date-label').innerText = isToday ? "Today" : new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-            document.getElementById('selected-time-val').innerText = data ? `${Math.floor(data.minutes / 60)}h ${data.minutes % 60}m` : "0h 0m";
-        }
+    function renderTasks() {  
+        const container = document.getElementById('task-list');  
+        if (!state.tasks.length) { container.innerHTML = `<p class="text-center py-10 text-slate-600 text-[10px] uppercase font-bold tracking-widest">No Missions Set</p>`; return; }  
+        container.innerHTML = state.tasks.map(t => `  
+            <div class="glass-card p-4 flex items-center justify-between">  
+                <div class="flex items-center gap-3">  
+                    <button onclick="toggleTask(${t.id})" class="w-6 h-6 rounded-lg border-2 flex items-center justify-center ${t.done ? 'bg-sky-500 border-sky-500' : 'border-slate-700'}">  
+                        ${t.done ? '<i class="fas fa-check text-[10px] text-white"></i>' : ''}  
+                    </button>  
+                    <span class="text-sm ${t.done ? 'line-through text-slate-600' : 'text-slate-200'}">${t.text}</span>  
+                </div>  
+                <button onclick="deleteTask(${t.id})" class="text-slate-700 hover:text-rose-500"><i class="fas fa-trash-alt"></i></button>  
+            </div>  
+        `).join('');  
+    }  
 
-        function openFullStats() {
-            const date = graphDates[selectedIdx];
-            const data = state.dailyHistory[date];
-            document.getElementById('modal-date').innerText = (date === state.date) ? "Today" : new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-            const completed = data?.completedMissions || [];
-            const incomplete = data?.pendingMissions || [];
-            document.getElementById('modal-body-content').innerHTML = `
-                <div class="flex items-center gap-4 bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
-                    <div class="w-12 h-12 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-500"><i class="fas fa-clock"></i></div>
-                    <div>
-                        <p class="text-[10px] text-slate-500 uppercase font-bold">Total Focused</p>
-                        <p class="text-xl font-black text-white">${data ? Math.floor(data.minutes / 60)+'h '+(data.minutes % 60)+'m' : '0h 0m'}</p>
-                    </div>
-                </div>
-                <div class="space-y-3">
-                    <p class="text-[10px] text-emerald-500 uppercase font-bold" style="color: #10b981;">Completed Missions</p>
-                    <div class="max-h-24 overflow-y-auto space-y-2 pr-2 text-xs text-emerald-200">
-                        ${completed.length ? completed.map(m => `<div class="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/30">✓ ${m}</div>`).join('') : "<div class='text-slate-600 italic'>None</div>"}
-                    </div>
-                </div>
-                <div class="space-y-3 border-t border-slate-800 pt-4">
-                    <p class="text-[10px] text-rose-500 uppercase font-bold" style="color: #f43f5e;">Incomplete Missions</p>
-                    <div class="max-h-24 overflow-y-auto space-y-2 pr-2 text-xs text-rose-300">
-                        ${incomplete.length ? incomplete.map(m => `<div class="bg-rose-500/10 p-2 rounded-lg border border-rose-500/30">✕ ${m}</div>`).join('') : "<div class='text-slate-600 italic'>None</div>"}
-                    </div>
-                </div>
-            `;
-            document.getElementById('stats-modal').style.display = 'flex';
-        }
+    function initGraph() {  
+        graphDates = [];  
+        for (let i = 29; i >= 0; i--) {  
+            const d = new Date(); d.setDate(d.getDate() - i);  
+            graphDates.push(d.toDateString());  
+        }  
+        renderGraph();  
+        updateSelectedDay(29);  
+    }  
 
-        function closeStatsModal() { document.getElementById('stats-modal').style.display = 'none'; }
-        
-        function toggleMute() {
-            state.isMuted = !state.isMuted;
-            updateUI();
-        }
+    function renderGraph() {  
+        const container = document.getElementById('study-graph');  
+        container.innerHTML = '';  
+        const values = graphDates.map(d => state.dailyHistory[d]?.minutes || 0);  
+        const maxVal = Math.max(...values, 60);  
+          
+        graphDates.forEach((date, i) => {  
+            const wrapper = document.createElement('div');  
+            wrapper.className = 'chart-bar-wrapper';  
+            const bar = document.createElement('div');  
+            bar.id = `bar-${i}`;  
+            bar.className = `chart-bar ${date === state.date ? 'active' : ''}`;  
+            bar.style.height = `${Math.min((values[i] / maxVal) * 100, 100)}%`;  
+            bar.onclick = () => { document.getElementById('graph-slider').value = i; updateSelectedDay(i); };  
+            wrapper.appendChild(bar);  
+            container.appendChild(wrapper);  
+        });  
+    }  
 
-        window.onload = checkDayTransition;
+    document.getElementById('graph-slider').addEventListener('input', (e) => {  
+        updateSelectedDay(parseInt(e.target.value));  
+    });  
 
-        document.addEventListener('visibilitychange', () => { 
-            // Safety 2: When returning, just reset reference to now
-            // This prevents double counting and allows tick() to resume normally
-            if (!document.hidden && timer.isRunning) {
-                checkDayTransition();
-                timer.lastTimestamp = Date.now();
-            }
-        });
-    </script>
-</body>
-    </html>
+    function updateSelectedDay(idx) {  
+        selectedIdx = idx;  
+        const dateStr = graphDates[idx];  
+        const isToday = dateStr === state.date;  
+        const data = state.dailyHistory[dateStr];  
+        document.querySelectorAll('.chart-bar').forEach(b => b.classList.remove('highlighted'));  
+        const bar = document.getElementById(`bar-${idx}`);  
+        if(bar) bar.classList.add('highlighted');  
+        document.getElementById('selected-date-label').innerText = isToday ? "Today" : new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });  
+        document.getElementById('selected-time-val').innerText = data ? `${Math.floor(data.minutes / 60)}h ${data.minutes % 60}m` : "0h 0m";  
+    }  
+
+    function openFullStats() {  
+        const date = graphDates[selectedIdx];  
+        const data = state.dailyHistory[date];  
+        document.getElementById('modal-date').innerText = (date === state.date) ? "Today" : new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });  
+        const completed = data?.completedMissions || [];  
+        const incomplete = data?.pendingMissions || [];  
+        document.getElementById('modal-body-content').innerHTML = `  
+            <div class="flex items-center gap-4 bg-slate-900/50 p-4 rounded-2xl border border-slate-800">  
+                <div class="w-12 h-12 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-500"><i class="fas fa-clock"></i></div>  
+                <div>  
+                    <p class="text-[10px] text-slate-500 uppercase font-bold">Total Focused</p>  
+                    <p class="text-xl font-black text-white">${data ? Math.floor(data.minutes / 60)+'h '+(data.minutes % 60)+'m' : '0h 0m'}</p>  
+                </div>  
+            </div>  
+            <div class="space-y-3">  
+                <p class="text-[10px] text-emerald-500 uppercase font-bold" style="color: #10b981;">Completed Missions</p>  
+                <div class="max-h-24 overflow-y-auto space-y-2 pr-2 text-xs text-emerald-200">  
+                    ${completed.length ? completed.map(m => `<div class="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/30">✓ ${m}</div>`).join('') : "<div class='text-slate-600 italic'>None</div>"}  
+                </div>  
+            </div>  
+            <div class="space-y-3 border-t border-slate-800 pt-4">  
+                <p class="text-[10px] text-rose-500 uppercase font-bold" style="color: #f43f5e;">Incomplete Missions</p>  
+                <div class="max-h-24 overflow-y-auto space-y-2 pr-2 text-xs text-rose-300">  
+                    ${incomplete.length ? incomplete.map(m => `<div class="bg-rose-500/10 p-2 rounded-lg border border-rose-500/30">✕ ${m}</div>`).join('') : "<div class='text-slate-600 italic'>None</div>"}  
+                </div>  
+            </div>  
+        `;  
+        document.getElementById('stats-modal').style.display = 'flex';  
+    }  
+
+    function closeStatsModal() { document.getElementById('stats-modal').style.display = 'none'; }  
+      
+    function toggleMute() {  
+        state.isMuted = !state.isMuted;  
+        updateUI();  
+    }  
+
+    window.onload = () => {
+  checkDayTransition();
+
+  const savedTimer = JSON.parse(localStorage.getItem('ssc26_timer'));
+  if (savedTimer && savedTimer.isRunning && savedTimer.endTime) {
+    timer.endTime = savedTimer.endTime;
+    timer.isRunning = true;
+    timer.mode = savedTimer.mode;
+    timer.extraMinutes = savedTimer.extraMinutes || 0;
+
+    const remaining = Math.ceil((timer.endTime - Date.now()) / 1000);
+    timer.duration = Math.max(0, remaining);
+      if (isNaN(timer.duration) || timer.duration <= 0) {
+    timer.duration = timer.mode === 'study'
+        ? SETTINGS.studyMinutes * 60
+        : SETTINGS.breakMinutes * 60;
+}
+
+    requestAnimationFrame(tick);
+  }
+};    
+
+    document.addEventListener('visibilitychange', () => {   
+  if (!document.hidden && timer.isRunning) {  
+    checkDayTransition();  
+  }  
+});  
+</script>
+
+</body>  
+</html>
