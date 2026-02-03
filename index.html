@@ -343,9 +343,15 @@
                 timer.mode = 'break';
                 timer.duration = SETTINGS.breakMinutes * 60;
                 timer.extraMinutes = 0;
+              if (window.Android) {
+  Android.studyFinished();
+}
             } else {
                 timer.mode = 'study';
                 timer.duration = SETTINGS.studyMinutes * 60;
+              if (window.Android) {
+  Android.breakFinished();
+}
             }
             syncDailyHistory(state.date);
             updateUI();
@@ -575,4 +581,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
