@@ -53,6 +53,30 @@
         </div>
     </div>
 
+    <!-- Modal for Settings -->
+    <div id="settings-modal" class="modal-overlay" onclick="closeSettingsModal()">
+        <div class="modal-content glass-card p-6 border-t-4 border-sky-500" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h3 class="text-lg font-bold text-white">Timer Config</h3>
+                    <p class="text-[10px] text-sky-400 font-bold uppercase tracking-widest">Personalize Session</p>
+                </div>
+                <button onclick="closeSettingsModal()" class="text-slate-500 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="space-y-6">
+                <div>
+                    <label class="text-[10px] text-slate-500 font-bold uppercase block mb-2">Study Minutes</label>
+                    <input type="number" id="study-min-input" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-sky-500">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-500 font-bold uppercase block mb-2">Break Minutes</label>
+                    <input type="number" id="break-min-input" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-sky-500">
+                </div>
+                <button onclick="saveSettings()" class="w-full py-3 bg-sky-600 rounded-xl text-white font-bold uppercase text-xs tracking-widest">Save Config</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Audio Elements -->
     <audio id="click-sound" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
     <audio id="end-sound" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
@@ -67,20 +91,21 @@
                 </div>
                 <p class="text-[10px] text-slate-500 font-semibold uppercase tracking-widest">SSC 2026</p>
             </div>
-            <div class="glass-card px-4 py-2 flex items-center gap-3 border-l-4 border-sky-500">
-                <div class="w-8 h-8 rounded-full bg-sky-500/10 flex items-center justify-center">
-                    <i class="fas fa-history text-sky-500 text-xs"></i>
-                </div>
-                <div class="text-right">
-                    <p class="text-[8px] text-slate-500 uppercase font-bold">Today Focus</p>
-                    <span id="total-focus-display" class="text-xs font-black text-white">0h 0m</span>
-                    <p id="streak-display" class="text-[9px] font-bold text-orange-400 mt-0.5 hidden"></p>
+            <div class="flex items-center gap-2">
+                <div class="glass-card px-4 py-2 flex items-center gap-3 border-l-4 border-sky-500">
+                    <button onclick="openSettingsModal()" class="w-8 h-8 rounded-full bg-sky-500/10 flex items-center justify-center text-sky-500 hover:bg-sky-500/20 transition-all">
+                        <i class="fas fa-cog text-xs"></i>
+                    </button>
+                    <div class="text-right">
+                        <p class="text-[8px] text-slate-500 uppercase font-bold">Today Focus</p>
+                        <span id="total-focus-display" class="text-xs font-black text-white">0h 0m</span>
+                        <p id="streak-display" class="text-[9px] font-bold text-orange-400 mt-0.5 hidden"></p>
+                    </div>
                 </div>
             </div>
         </header>
 
         <main id="app-content">
-            <!-- Timer Section -->
             <section id="timer" class="page-section active space-y-6">
                 <div class="glass-card p-10 text-center premium-border">
                     <div id="timer-label" class="inline-block px-4 py-1 rounded-full bg-slate-900/50 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-8">Focus Session</div>
@@ -90,14 +115,17 @@
                             <circle id="timer-circle" cx="112" cy="112" r="104" stroke="url(#timer-gradient)" stroke-width="8" fill="transparent" stroke-dasharray="653.4" stroke-dashoffset="0" stroke-linecap="round" class="transition-all duration-1000" />
                             <defs><linearGradient id="timer-gradient"><stop offset="0%" stop-color="#38bdf8" /><stop offset="100%" stop-color="#818cf8" /></linearGradient></defs>
                         </svg>
-                        <div class="absolute inset-0 flex flex-col items-center justify-center">
-                            <span id="timer-display" class="text-6xl font-black text-white">25:00</span>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center px-4">
+                            <span id="timer-display" class="text-5xl sm:text-6xl font-black text-white truncate w-full">25:00</span>
                         </div>
                     </div>
-                    <div class="flex gap-4 justify-center items-center">
-                        <button onclick="resetTimer()" class="w-12 h-12 rounded-2xl bg-slate-900/50 border border-slate-800 text-slate-400"><i class="fas fa-redo-alt"></i></button>
-                        <button id="timer-btn" onclick="toggleTimer()" class="h-16 px-10 rounded-3xl bg-sky-600 text-white font-bold text-lg uppercase">START</button>
-                        <button onclick="toggleMute()" class="w-12 h-12 rounded-2xl bg-slate-900/50 border border-slate-800 text-slate-400"><i id="mute-icon" class="fas fa-volume-up"></i></button>
+                    <div class="flex flex-col gap-4 items-center">
+                        <div class="flex gap-3 justify-center items-center">
+                            <button onclick="resetTimer()" class="w-12 h-12 rounded-2xl bg-slate-900/50 border border-slate-800 text-slate-400" title="Reset"><i class="fas fa-redo-alt"></i></button>
+                            <button id="timer-btn" onclick="toggleTimer()" class="h-16 px-10 rounded-3xl bg-sky-600 text-white font-bold text-lg uppercase shadow-lg shadow-sky-900/20">START</button>
+                            <button onclick="toggleMute()" class="w-12 h-12 rounded-2xl bg-slate-900/50 border border-slate-800 text-slate-400"><i id="mute-icon" class="fas fa-volume-up"></i></button>
+                        </div>
+                        <button id="add-5m-btn" onclick="addFiveMinutes()" class="px-6 py-2 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-500 text-[10px] font-black tracking-widest uppercase hover:bg-sky-500/20 transition-all" title="Add 5 min">+5 Minutes</button>
                     </div>
                 </div>
 
@@ -110,7 +138,6 @@
                 </div>
             </section>
 
-            <!-- Missions Section -->
             <section id="tasks" class="page-section space-y-4">
                 <div class="flex justify-between items-center mb-2 px-1">
                     <h2 class="text-xl font-bold">Daily Missions</h2>
@@ -123,25 +150,18 @@
                 <div id="task-list" class="space-y-3"></div>
             </section>
 
-            <!-- Stats Section -->
             <section id="stats" class="page-section space-y-6">
                 <div class="glass-card p-6 border-t-4 border-sky-500">
                     <div class="flex justify-between items-center mb-2">
                         <h3 class="font-bold text-sm">Last 30 Days Activity</h3>
                         <div id="selected-date-label" class="text-[10px] text-sky-400 font-bold uppercase">Today</div>
                     </div>
-                    
                     <div id="study-graph" class="chart-container"></div>
-                    
-                    <!-- Slider for Graph Navigation -->
                     <input type="range" id="graph-slider" min="0" max="29" value="29" class="custom-slider">
-                    
                     <div class="flex justify-between px-1 -mt-2 mb-4">
                         <span class="text-[8px] text-slate-600 font-bold uppercase">30 Days Ago</span>
                         <span class="text-[8px] text-sky-500 font-bold uppercase">Today</span>
                     </div>
-
-                    <!-- Selected Day Summary -->
                     <div id="day-summary" class="bg-slate-900/40 rounded-xl p-3 border border-slate-800 flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <i class="fas fa-clock text-sky-500 text-xs"></i>
@@ -153,7 +173,6 @@
                         <button onclick="openFullStats()" class="text-[8px] text-sky-400 font-bold uppercase bg-sky-400/10 px-2 py-1 rounded">Details</button>
                     </div>
                 </div>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <div class="glass-card p-4"><p class="text-[10px] text-slate-500 font-bold uppercase">Total Sessions</p><p id="session-count" class="text-xl font-black">0</p></div>
                     <div class="glass-card p-4"><p class="text-[10px] text-slate-500 font-bold uppercase">Mission Progress</p><p id="progress-percent" class="text-xl font-black">0%</p></div>
@@ -161,7 +180,6 @@
             </section>
         </main>
 
-        <!-- Bottom Nav -->
         <div class="bottom-nav-container">
             <nav class="glass-card p-2 flex justify-around items-center border border-white/10">
                 <button onclick="showSection('tasks')" id="nav-tasks" class="w-14 h-14 rounded-xl text-slate-500"><i class="fas fa-tasks"></i></button>
@@ -172,9 +190,12 @@
     </div>
 
     <script>
+        // --- SETTINGS & STATE ---
+        let SETTINGS = JSON.parse(localStorage.getItem('ssc26_settings')) || { studyMinutes: 25, breakMinutes: 5 };
         let state = {
             tasks: JSON.parse(localStorage.getItem('ssc26_tasks')) || [],
             totalFocusedMinutes: Number(localStorage.getItem('ssc26_focused_min')) || 0,
+            accumulatedSeconds: Number(localStorage.getItem('ssc26_acc_sec')) || 0, 
             sessions: Number(localStorage.getItem('ssc26_sessions')) || 0,
             date: localStorage.getItem('ssc26_date') || new Date().toDateString(),
             isMuted: JSON.parse(localStorage.getItem('ssc26_muted')) || false,
@@ -183,18 +204,30 @@
             dailyHistory: JSON.parse(localStorage.getItem('ssc26_daily_history')) || {}
         };
 
-        let timer = { isRunning: false, startTime: null, duration: 1500, mode: 'study', interval: null };
+        // --- TIMER OBJECT ---
+        let timer = { 
+            isRunning: false, 
+            lastTimestamp: null, 
+            duration: SETTINGS.studyMinutes * 60, 
+            mode: 'study', 
+            interval: null,
+            extraMinutes: 0
+        };
+
         let graphDates = [];
         let selectedIdx = 29;
 
         function saveState() {
             localStorage.setItem('ssc26_tasks', JSON.stringify(state.tasks));
             localStorage.setItem('ssc26_focused_min', state.totalFocusedMinutes);
+            localStorage.setItem('ssc26_acc_sec', state.accumulatedSeconds);
             localStorage.setItem('ssc26_sessions', state.sessions);
             localStorage.setItem('ssc26_date', state.date);
             localStorage.setItem('ssc26_streak', state.streak);
             localStorage.setItem('ssc26_last_streak_date', state.lastStreakDate);
             localStorage.setItem('ssc26_daily_history', JSON.stringify(state.dailyHistory));
+            localStorage.setItem('ssc26_settings', JSON.stringify(SETTINGS));
+            localStorage.setItem('ssc26_muted', state.isMuted);
         }
 
         function playSound(id) { if(!state.isMuted) document.getElementById(id).play().catch(()=>{}); }
@@ -208,8 +241,15 @@
                     if (state.lastStreakDate !== yesterday.toDateString()) state.streak = 0;
                 }
                 state.totalFocusedMinutes = 0;
+                state.accumulatedSeconds = 0;
                 state.sessions = 0;
                 state.date = today;
+                
+                // Safety: Reset timer tracking if day changes mid-session
+                if (timer.isRunning) {
+                    timer.lastTimestamp = Date.now();
+                }
+                
                 saveState();
             }
             syncDailyHistory(today);
@@ -237,31 +277,75 @@
 
         function toggleTimer() {
             playSound('click-sound');
-            if (timer.isRunning) { clearInterval(timer.interval); timer.isRunning = false; }
-            else { timer.startTime = Date.now(); timer.isRunning = true; timer.interval = setInterval(tick, 1000); }
+            checkDayTransition(); // Ensure day is correct before starting
+            if (timer.isRunning) { 
+                timer.isRunning = false; 
+                clearInterval(timer.interval);
+                timer.lastTimestamp = null;
+            }
+            else { 
+                timer.isRunning = true; 
+                timer.lastTimestamp = Date.now();
+                timer.interval = setInterval(tick, 1000); 
+            }
             updateUI();
         }
 
         function tick() {
-            const elapsed = Math.floor((Date.now() - timer.startTime) / 1000);
-            const remaining = timer.duration - elapsed;
-            if (remaining <= 0) { clearInterval(timer.interval); completeSession(); }
-            else { updateTimerDisplay(remaining); }
+            if (!timer.isRunning || !timer.lastTimestamp) return;
+
+            const now = Date.now();
+            let deltaMs = now - timer.lastTimestamp;
+            let deltaSecTotal = Math.floor(deltaMs / 1000);
+
+            if (deltaSecTotal >= 1) {
+                // Safety 1: Cap deltaSec to 5s to avoid visual glitching/large jumps
+                // but process all seconds in a loop for accuracy
+                const cappedDelta = Math.min(deltaSecTotal, 5); 
+                
+                // Update time reference
+                timer.lastTimestamp = now;
+
+                // Process time logic
+                for (let i = 0; i < cappedDelta; i++) {
+                    timer.duration -= 1;
+                    
+                    if (timer.mode === 'study') {
+                        state.accumulatedSeconds += 1;
+                        if (state.accumulatedSeconds >= 60) {
+                            state.totalFocusedMinutes += 1;
+                            state.accumulatedSeconds = 0;
+                            syncDailyHistory(state.date);
+                        }
+                    }
+
+                    if (timer.duration <= 0) {
+                        timer.duration = 0;
+                        clearInterval(timer.interval);
+                        completeSession();
+                        return; // Stop processing loop if session ends
+                    }
+                }
+                
+                updateUI();
+            }
         }
 
         function completeSession() {
             playSound('end-sound');
             timer.isRunning = false;
+            timer.lastTimestamp = null;
+            
             if (timer.mode === 'study') {
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
                 state.sessions++;
-                state.totalFocusedMinutes += 25;
                 updateStreak();
                 timer.mode = 'break';
-                timer.duration = 300;
+                timer.duration = SETTINGS.breakMinutes * 60;
+                timer.extraMinutes = 0;
             } else {
                 timer.mode = 'study';
-                timer.duration = 1500;
+                timer.duration = SETTINGS.studyMinutes * 60;
             }
             syncDailyHistory(state.date);
             updateUI();
@@ -271,34 +355,85 @@
             playSound('click-sound');
             clearInterval(timer.interval);
             timer.isRunning = false;
-            timer.duration = timer.mode === 'study' ? 1500 : 300;
+            timer.lastTimestamp = null;
+            timer.duration = timer.mode === 'study' ? SETTINGS.studyMinutes * 60 : SETTINGS.breakMinutes * 60;
+            timer.extraMinutes = 0;
             updateUI();
         }
 
+        function addFiveMinutes() {
+            if (timer.mode !== 'study') return;
+            playSound('click-sound');
+            timer.duration += 300;
+            timer.extraMinutes += 300;
+            updateUI();
+        }
+
+        function cancelBreak() {
+            if (timer.mode !== 'break') return;
+            playSound('click-sound');
+            clearInterval(timer.interval);
+            timer.isRunning = false;
+            timer.lastTimestamp = null;
+            timer.mode = 'study';
+            timer.duration = SETTINGS.studyMinutes * 60;
+            timer.extraMinutes = 0;
+            updateUI();
+        }
+
+        function openSettingsModal() {
+            document.getElementById('study-min-input').value = SETTINGS.studyMinutes;
+            document.getElementById('break-min-input').value = SETTINGS.breakMinutes;
+            document.getElementById('settings-modal').style.display = 'flex';
+        }
+
+        function closeSettingsModal() { document.getElementById('settings-modal').style.display = 'none'; }
+
+        function saveSettings() {
+            const sm = parseInt(document.getElementById('study-min-input').value);
+            const bm = parseInt(document.getElementById('break-min-input').value);
+            if (sm > 0 && bm > 0) {
+                SETTINGS.studyMinutes = sm;
+                SETTINGS.breakMinutes = bm;
+                saveState();
+                resetTimer();
+                closeSettingsModal();
+            }
+        }
+
         function updateUI() {
-            const currentRemaining = timer.isRunning ? 
-                timer.duration - Math.floor((Date.now() - timer.startTime) / 1000) : 
-                timer.duration;
-            updateTimerDisplay(currentRemaining);
+            updateTimerDisplay(timer.duration);
+            
             document.getElementById('timer-label').innerText = timer.mode === 'study' ? "Focus Session" : "Short Break";
-            document.getElementById('timer-btn').innerText = timer.isRunning ? "PAUSE" : (currentRemaining < timer.duration ? "RESUME" : "START");
+            document.getElementById('timer-btn').innerText = timer.isRunning ? "PAUSE" : (timer.duration < (timer.mode === 'study' ? (SETTINGS.studyMinutes*60 + timer.extraMinutes) : SETTINGS.breakMinutes*60) ? "RESUME" : "START");
+            
             document.getElementById('break-controls').classList.toggle('hidden', timer.mode !== 'break');
+            
+            const addBtn = document.getElementById('add-5m-btn');
+            addBtn.style.display = timer.mode === 'study' ? 'inline-block' : 'none';
+
             document.getElementById('total-focus-display').innerText = `${Math.floor(state.totalFocusedMinutes / 60)}h ${state.totalFocusedMinutes % 60}m`;
             document.getElementById('session-count').innerText = state.sessions;
+            
             const streakEl = document.getElementById('streak-display');
             if (state.streak > 0) { streakEl.innerText = `🔥 ${state.streak} day streak`; streakEl.classList.remove('hidden'); }
             else streakEl.classList.add('hidden');
+            
             const doneCount = state.tasks.filter(t => t.done).length;
             const percent = state.tasks.length ? Math.round((doneCount / state.tasks.length) * 100) : 0;
             document.getElementById('progress-percent').innerText = percent + '%';
+            
+            document.getElementById('mute-icon').className = state.isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
             saveState();
         }
 
         function updateTimerDisplay(seconds) {
             const m = Math.floor(seconds / 60); const s = seconds % 60;
             document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-            const max = timer.mode === 'study' ? 1500 : 300;
-            document.getElementById('timer-circle').style.strokeDashoffset = 653.4 - (seconds / max) * 653.4;
+            
+            const max = timer.mode === 'study' ? (SETTINGS.studyMinutes * 60 + timer.extraMinutes) : (SETTINGS.breakMinutes * 60);
+            const offset = max > 0 ? 653.4 - (seconds / max) * 653.4 : 0;
+            document.getElementById('timer-circle').style.strokeDashoffset = offset;
         }
 
         function showSection(id) {
@@ -384,10 +519,9 @@
             const dateStr = graphDates[idx];
             const isToday = dateStr === state.date;
             const data = state.dailyHistory[dateStr];
-            
             document.querySelectorAll('.chart-bar').forEach(b => b.classList.remove('highlighted'));
-            document.getElementById(`bar-${idx}`).classList.add('highlighted');
-            
+            const bar = document.getElementById(`bar-${idx}`);
+            if(bar) bar.classList.add('highlighted');
             document.getElementById('selected-date-label').innerText = isToday ? "Today" : new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
             document.getElementById('selected-time-val').innerText = data ? `${Math.floor(data.minutes / 60)}h ${data.minutes % 60}m` : "0h 0m";
         }
@@ -396,10 +530,8 @@
             const date = graphDates[selectedIdx];
             const data = state.dailyHistory[date];
             document.getElementById('modal-date').innerText = (date === state.date) ? "Today" : new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-            
             const completed = data?.completedMissions || [];
             const incomplete = data?.pendingMissions || [];
-
             document.getElementById('modal-body-content').innerHTML = `
                 <div class="flex items-center gap-4 bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
                     <div class="w-12 h-12 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-500"><i class="fas fa-clock"></i></div>
@@ -425,15 +557,22 @@
         }
 
         function closeStatsModal() { document.getElementById('stats-modal').style.display = 'none'; }
+        
         function toggleMute() {
             state.isMuted = !state.isMuted;
-            document.getElementById('mute-icon').className = state.isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
-            saveState();
+            updateUI();
         }
 
         window.onload = checkDayTransition;
-        document.addEventListener('visibilitychange', () => { if (!document.hidden && timer.isRunning) tick(); });
+
+        document.addEventListener('visibilitychange', () => { 
+            // Safety 2: When returning, just reset reference to now
+            // This prevents double counting and allows tick() to resume normally
+            if (!document.hidden && timer.isRunning) {
+                checkDayTransition();
+                timer.lastTimestamp = Date.now();
+            }
+        });
     </script>
 </body>
 </html>
-
