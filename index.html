@@ -186,6 +186,23 @@
 </div>  
 
 <script>  
+    let audioUnlocked = false;
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+
+  const sounds = ['click-sound', 'end-sound'];
+  sounds.forEach(id => {
+    const a = document.getElementById(id);
+    if (a) {
+      a.play().then(() => {
+        a.pause();
+        a.currentTime = 0;
+      }).catch(() => {});
+    }
+  });
+}
     // --- SETTINGS & STATE ---  
     let SETTINGS = JSON.parse(localStorage.getItem('ssc26_settings')) || { studyMinutes: 25, breakMinutes: 5 };  
     let state = {  
@@ -308,6 +325,7 @@ let sessionStartTimestamp = null;
     requestAnimationFrame(tick);
 }  
   function toggleTimer() {
+      unlockAudio();
     playSound('click-sound');
 
     if (!timer.isRunning) {
@@ -629,4 +647,4 @@ function resetTimer() {
 </script>
 
 </body>  
-</html>
+    </html>
