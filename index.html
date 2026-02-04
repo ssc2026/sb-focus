@@ -35,7 +35,6 @@
 
 </head>  
 <body class="pb-32">  
-    <!-- Modal for Detailed Stats -->  
     <div id="stats-modal" class="modal-overlay" onclick="closeStatsModal()">  
         <div class="modal-content glass-card p-6 border-t-4 border-sky-500" onclick="event.stopPropagation()">  
             <div class="flex justify-between items-start mb-6">  
@@ -45,11 +44,10 @@
                 </div>  
                 <button onclick="closeStatsModal()" class="text-slate-500 hover:text-white"><i class="fas fa-times text-xl"></i></button>  
             </div>  
-            <div id="modal-body-content" class="space-y-6">  
-                <!-- Data injected by JS -->  
-            </div>  
+            <div id="modal-body-content" class="space-y-6"></div>  
         </div>  
-    </div>  <!-- Modal for Settings -->  
+    </div>
+
 <div id="settings-modal" class="modal-overlay" onclick="closeSettingsModal()">  
     <div class="modal-content glass-card p-6 border-t-4 border-sky-500" onclick="event.stopPropagation()">  
         <div class="flex justify-between items-start mb-6">  
@@ -73,12 +71,10 @@
     </div>  
 </div>  
 
-<!-- Audio Elements -->  
 <audio id="click-sound" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>  
 <audio id="end-sound" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>  
 
 <div class="max-w-md mx-auto p-5 space-y-6">  
-    <!-- Header -->  
     <header class="flex justify-between items-center py-6">  
         <div>  
             <div class="flex items-center gap-2">  
@@ -186,29 +182,11 @@
 </div>  
 
 <script>  
-    let audioUnlocked = false;
-
-function unlockAudio() {
-  if (audioUnlocked) return;
-  audioUnlocked = true;
-
-  const sounds = ['click-sound', 'end-sound'];
-  sounds.forEach(id => {
-    const a = document.getElementById(id);
-    if (a) {
-      a.play().then(() => {
-        a.pause();
-        a.currentTime = 0;
-      }).catch(() => {});
-    }
-  });
-}
     // --- SETTINGS & STATE ---  
     let SETTINGS = JSON.parse(localStorage.getItem('ssc26_settings')) || { studyMinutes: 25, breakMinutes: 5 };  
     let state = {  
         tasks: JSON.parse(localStorage.getItem('ssc26_tasks')) || [],  
         totalFocusedMinutes: Number(localStorage.getItem('ssc26_focused_min')) || 0,  
-        accumulatedSeconds: Number(localStorage.getItem('ssc26_acc_sec')) || 0,   
         sessions: Number(localStorage.getItem('ssc26_sessions')) || 0,  
         date: localStorage.getItem('ssc26_date') || new Date().toDateString(),  
         isMuted: JSON.parse(localStorage.getItem('ssc26_muted')) || false,  
@@ -217,30 +195,14 @@ function unlockAudio() {
         dailyHistory: JSON.parse(localStorage.getItem('ssc26_daily_history')) || {}  
     };  
 
-    // --- TIMER OBJECT ---  
-      let timer = {
-  isRunning: false,
-  endTime: null,
-  mode: 'study',
-  extraMinutes: 0,
-  duration: SETTINGS.studyMinutes * 60   // ✅ এই লাইনটাই missing ছিল
-};
-
+    let timer = { isRunning: false, endTime: null, mode: 'study', extraMinutes: 0, duration: SETTINGS.studyMinutes * 60 };
     let graphDates = [];  
     let selectedIdx = 29;
-let sessionStartTimestamp = null;    
-    let sessionAccumulatedMs = 0;
+    let audioUnlocked = false;
 
     function saveState() {  
-        localStorage.setItem('ssc26_timer', JSON.stringify({
-  endTime: timer.endTime,
-  isRunning: timer.isRunning,
-  mode: timer.mode,
-  extraMinutes: timer.extraMinutes
-}));
         localStorage.setItem('ssc26_tasks', JSON.stringify(state.tasks));  
         localStorage.setItem('ssc26_focused_min', state.totalFocusedMinutes);  
-        localStorage.setItem('ssc26_acc_sec', state.accumulatedSeconds);  
         localStorage.setItem('ssc26_sessions', state.sessions);  
         localStorage.setItem('ssc26_date', state.date);  
         localStorage.setItem('ssc26_streak', state.streak);  
@@ -250,401 +212,306 @@ let sessionStartTimestamp = null;
         localStorage.setItem('ssc26_muted', state.isMuted);  
     }  
 
-    function playSound(id) { if(!state.isMuted) document.getElementById(id).play().catch(()=>{}); }  
+    // --- MISSION & HISTORY LOGIC (MODIFIED) ---
 
     function checkDayTransition() {  
         const today = new Date().toDateString();  
         if (state.date !== today) {  
-            syncDailyHistory(state.date);  
+            // ১. গত দিনের জন্য হিস্ট্রি স্ন্যাপশট পারমানেন্টলি সেভ করুন (রাত ১২টার ট্রানজিশনে একবারই হবে)
+            saveSnapshot(state.date);  
+            
+            // ২. স্ট্রিক হ্যান্ডলিং
             const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);  
             if (state.totalFocusedMinutes < 25 && state.lastStreakDate !== today) {  
                 if (state.lastStreakDate !== yesterday.toDateString()) state.streak = 0;  
             }  
+            
+            // ৩. নতুন দিনের জন্য ভেরিয়েবল রিসেট
             state.totalFocusedMinutes = 0;  
-            state.accumulatedSeconds = 0;  
             state.sessions = 0;  
             state.date = today;  
-              
-            // Safety: Reset timer tracking if day changes mid-session  
-              
+
+            // ৪. মিশন ফিল্টারিং: Completed গুলো রিমুভ হবে, Incomplete গুলো ক্যারি হবে
+            state.tasks = state.tasks.filter(t => !t.done);
               
             saveState();  
         }  
-        syncDailyHistory(today);  
         updateUI();  
     }  
 
-    function syncDailyHistory(dateStr) {  
-        state.dailyHistory[dateStr] = {  
-            minutes: dateStr === state.date ? state.totalFocusedMinutes : (state.dailyHistory[dateStr]?.minutes || 0),  
-            completedMissions: state.tasks.filter(t => t.done).map(t => t.text),  
-            pendingMissions: state.tasks.filter(t => !t.done).map(t => t.text)  
-        };  
-        saveState();  
-    }  
-
-    function updateStreak() {  
-        const today = new Date().toDateString();  
-        if (state.lastStreakDate === today) return;  
-        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);  
-        if (state.lastStreakDate === yesterday.toDateString()) state.streak++;  
-        else state.streak = 1;  
-        state.lastStreakDate = today;  
-        saveState();  
-    }  
-
-      
-
-    function tick() {
-    if (!timer.isRunning || !timer.endTime) return;
-
-    const now = Date.now();
-    const remainingMs = timer.endTime - now;
-    const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
-
-    timer.duration = remainingSec;
-
-    if (timer.mode === 'study') {
-        const totalPlanned =
-            timer.mode === 'study'
-                ? SETTINGS.studyMinutes * 60 + timer.extraMinutes
-                : SETTINGS.breakMinutes * 60;
-
-        const elapsed = totalPlanned - remainingSec;
-
+    function saveSnapshot(dateToSave) {
+        // যদি ঐ দিনের হিস্ট্রি অলরেডি পারমানেন্টলি সেভ থাকে, তবে আর কিছু করবে না
+        // snapshot একবারই সেভ হবে রাত ১২টায় ট্রানজিশনের সময়
+        const snapshot = {
+            minutes: state.totalFocusedMinutes,
+            completedMissions: state.tasks.filter(t => t.done).map(t => t.text),
+            pendingMissions: state.tasks.filter(t => !t.done).map(t => t.text)
+        };
         
-        
-    }
-
-    if (remainingSec <= 0) {
-        completeSession();
-        return;
-    }
-
-    updateUI();
-    requestAnimationFrame(tick);
-}  
-  function toggleTimer() {
-      unlockAudio();
-    playSound('click-sound');
-
-    if (!timer.isRunning) {
-        // START বা RESUME
-        timer.isRunning = true;
-        
-        // SAFE GUARD: duration NaN হলে ঠিক করে দেবে
-if (!timer.duration || isNaN(timer.duration)) {
-    timer.duration = timer.mode === 'study'
-        ? SETTINGS.studyMinutes * 60
-        : SETTINGS.breakMinutes * 60;
-}
-
-        if (!sessionStartTimestamp && timer.mode === 'study') {
-            sessionStartTimestamp = Date.now();
-        }
-
-        timer.endTime = Date.now() + timer.duration * 1000;
-        requestAnimationFrame(tick);
-
-    } else {
-        // PAUSE
-        timer.isRunning = false;
-
-        if (timer.mode === 'study' && sessionStartTimestamp) {
-            sessionAccumulatedMs += Date.now() - sessionStartTimestamp;
-            sessionStartTimestamp = null;
-        }
-
-        timer.duration = Math.max(
-            0,
-            Math.ceil((timer.endTime - Date.now()) / 1000)
-        );
-
-        timer.endTime = null;
+        state.dailyHistory[dateToSave] = snapshot;
         saveState();
     }
 
-    updateUI();
-}
+    // --- APP CORE FUNCTIONS ---
 
-
-    function completeSession() {  
-        playSound('end-sound');  
-        timer.isRunning = false;  
-        if (timer.mode === 'study') {
-    if (sessionStartTimestamp) {
-        sessionAccumulatedMs += Date.now() - sessionStartTimestamp;
-        sessionStartTimestamp = null;
+    function unlockAudio() {
+        if (audioUnlocked) return;
+        audioUnlocked = true;
+        ['click-sound', 'end-sound'].forEach(id => {
+            const a = document.getElementById(id);
+            a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(() => {});
+        });
     }
 
-    const minutes = Math.floor(sessionAccumulatedMs / 60000);
-    state.totalFocusedMinutes += minutes;
-    sessionAccumulatedMs = 0;
-}
-          
-          
-        if (timer.mode === 'study') {  
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });  
-            state.sessions++;  
-            updateStreak();  
-            timer.mode = 'break';  
-            timer.duration = SETTINGS.breakMinutes * 60;  
-            timer.extraMinutes = 0;  
-          if (window.Android) {
+    function playSound(id) { if(!state.isMuted) document.getElementById(id).play().catch(()=>{}); }
 
-Android.studyFinished();
-}
-} else {
-timer.mode = 'study';
-timer.duration = SETTINGS.studyMinutes * 60;
-if (window.Android) {
-Android.breakFinished();
-}
-}
-syncDailyHistory(state.date);
-updateUI();
-}
+    function toggleTimer() {
+        unlockAudio();
+        playSound('click-sound');
+        if (!timer.isRunning) {
+            timer.isRunning = true;
+            timer.endTime = Date.now() + timer.duration * 1000;
+            requestAnimationFrame(tick);
+        } else {
+            timer.isRunning = false;
+            timer.duration = Math.ceil((timer.endTime - Date.now()) / 1000);
+            timer.endTime = null;
+        }
+        updateUI();
+    }
 
-function resetTimer() {  
-    sessionStartTimestamp = null;
-    sessionAccumulatedMs = 0;
-        playSound('click-sound');            
-        timer.isRunning = false;            
-        timer.duration = timer.mode === 'study' ? SETTINGS.studyMinutes * 60 : SETTINGS.breakMinutes * 60;  
-        timer.extraMinutes = 0;  
-        updateUI();  
-    }  
+    function tick() {
+        if (!timer.isRunning) return;
+        const now = Date.now();
+        const diff = Math.ceil((timer.endTime - now) / 1000);
+        if (diff <= 0) { completeSession(); return; }
+        timer.duration = diff;
+        updateTimerDisplay(diff);
+        requestAnimationFrame(tick);
+    }
 
-    function addFiveMinutes() {  
-        if (timer.mode !== 'study') return;  
-        playSound('click-sound');  
-        timer.duration += 300;  
-        timer.extraMinutes += 300;  
-        updateUI();  
-    }  
+    function completeSession() {
+        playSound('end-sound');
+        timer.isRunning = false;
+        if (timer.mode === 'study') {
+            state.totalFocusedMinutes += Math.floor((SETTINGS.studyMinutes * 60 + timer.extraMinutes) / 60);
+            state.sessions++;
+            updateStreak();
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            timer.mode = 'break';
+            timer.duration = SETTINGS.breakMinutes * 60;
+        } else {
+            timer.mode = 'study';
+            timer.duration = SETTINGS.studyMinutes * 60;
+        }
+        timer.extraMinutes = 0;
+        updateUI();
+    }
 
-    function cancelBreak() {  
-        if (timer.mode !== 'break') return;  
-        playSound('click-sound');  
-          
-        timer.isRunning = false;  
-          
-        timer.mode = 'study';  
-        timer.duration = SETTINGS.studyMinutes * 60;  
-        timer.extraMinutes = 0;  
-        updateUI();  
-    }  
+    function updateStreak() {
+        const today = new Date().toDateString();
+        if (state.lastStreakDate === today) return;
+        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+        if (state.lastStreakDate === yesterday.toDateString()) state.streak++;
+        else state.streak = 1;
+        state.lastStreakDate = today;
+    }
 
-    function openSettingsModal() {  
-        document.getElementById('study-min-input').value = SETTINGS.studyMinutes;  
-        document.getElementById('break-min-input').value = SETTINGS.breakMinutes;  
-        document.getElementById('settings-modal').style.display = 'flex';  
-    }  
+    function resetTimer() {
+        timer.isRunning = false;
+        timer.duration = timer.mode === 'study' ? SETTINGS.studyMinutes * 60 : SETTINGS.breakMinutes * 60;
+        timer.extraMinutes = 0;
+        updateUI();
+    }
 
-    function closeSettingsModal() { document.getElementById('settings-modal').style.display = 'none'; }  
+    function addFiveMinutes() {
+        if (timer.mode !== 'study') return;
+        timer.duration += 300;
+        timer.extraMinutes += 300;
+        if (timer.isRunning) timer.endTime += 300000;
+        updateUI();
+    }
 
-    function saveSettings() {  
-        const sm = parseInt(document.getElementById('study-min-input').value);  
-        const bm = parseInt(document.getElementById('break-min-input').value);  
-        if (sm > 0 && bm > 0) {  
-            SETTINGS.studyMinutes = sm;  
-            SETTINGS.breakMinutes = bm;  
-            saveState();  
-            resetTimer();  
-            closeSettingsModal();  
-        }  
-    }  
+    function cancelBreak() {
+        if (timer.mode !== 'break') return;
+        timer.isRunning = false;
+        timer.mode = 'study';
+        timer.duration = SETTINGS.studyMinutes * 60;
+        timer.extraMinutes = 0;
+        updateUI();
+    }
 
-    function updateUI() {  
-        updateTimerDisplay(timer.duration);  
-          
-        document.getElementById('timer-label').innerText = timer.mode === 'study' ? "Focus Session" : "Short Break";  
-        document.getElementById('timer-btn').innerText = timer.isRunning ? "PAUSE" : (timer.duration < (timer.mode === 'study' ? (SETTINGS.studyMinutes*60 + timer.extraMinutes) : SETTINGS.breakMinutes*60) ? "RESUME" : "START");  
-          
-        document.getElementById('break-controls').classList.toggle('hidden', timer.mode !== 'break');  
-          
-        const addBtn = document.getElementById('add-5m-btn');  
-        addBtn.style.display = timer.mode === 'study' ? 'inline-block' : 'none';  
+    function updateUI() {
+        updateTimerDisplay(timer.duration);
+        document.getElementById('timer-label').innerText = timer.mode === 'study' ? "Focus Session" : "Short Break";
+        document.getElementById('timer-btn').innerText = timer.isRunning ? "PAUSE" : "START";
+        document.getElementById('break-controls').classList.toggle('hidden', timer.mode !== 'break');
+        document.getElementById('add-5m-btn').style.display = timer.mode === 'study' ? 'inline-block' : 'none';
+        document.getElementById('total-focus-display').innerText = `${Math.floor(state.totalFocusedMinutes / 60)}h ${state.totalFocusedMinutes % 60}m`;
+        document.getElementById('session-count').innerText = state.sessions;
+        const streakEl = document.getElementById('streak-display');
+        if (state.streak > 0) { streakEl.innerText = `🔥 ${state.streak} day streak`; streakEl.classList.remove('hidden'); }
+        else streakEl.classList.add('hidden');
+        const doneCount = state.tasks.filter(t => t.done).length;
+        const percent = state.tasks.length ? Math.round((doneCount / state.tasks.length) * 100) : 0;
+        document.getElementById('progress-percent').innerText = percent + '%';
+        document.getElementById('mute-icon').className = state.isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+        saveState();
+    }
 
-        document.getElementById('total-focus-display').innerText = `${Math.floor(state.totalFocusedMinutes / 60)}h ${state.totalFocusedMinutes % 60}m`;  
-        document.getElementById('session-count').innerText = state.sessions;  
-          
-        const streakEl = document.getElementById('streak-display');  
-        if (state.streak > 0) { streakEl.innerText = `🔥 ${state.streak} day streak`; streakEl.classList.remove('hidden'); }  
-        else streakEl.classList.add('hidden');  
-          
-        const doneCount = state.tasks.filter(t => t.done).length;  
-        const percent = state.tasks.length ? Math.round((doneCount / state.tasks.length) * 100) : 0;  
-        document.getElementById('progress-percent').innerText = percent + '%';  
-          
-        document.getElementById('mute-icon').className = state.isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';  
-        saveState();  
-    }  
+    function updateTimerDisplay(seconds) {
+        const m = Math.floor(seconds / 60); const s = seconds % 60;
+        document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        const max = timer.mode === 'study' ? (SETTINGS.studyMinutes * 60 + timer.extraMinutes) : (SETTINGS.breakMinutes * 60);
+        const offset = max > 0 ? 653.4 - (seconds / max) * 653.4 : 0;
+        document.getElementById('timer-circle').style.strokeDashoffset = offset;
+    }
 
-    function updateTimerDisplay(seconds) {  
-        const m = Math.floor(seconds / 60); const s = seconds % 60;  
-        document.getElementById('timer-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;  
-          
-        const max = timer.mode === 'study' ? (SETTINGS.studyMinutes * 60 + timer.extraMinutes) : (SETTINGS.breakMinutes * 60);  
-        const offset = max > 0 ? 653.4 - (seconds / max) * 653.4 : 0;  
-        document.getElementById('timer-circle').style.strokeDashoffset = offset;  
-    }  
+    // --- SECTION & MODAL MANAGEMENT ---
 
-    function showSection(id) {  
-        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));  
-        document.querySelectorAll('nav button').forEach(b => b.classList.remove('nav-active'));  
-        document.getElementById(id).classList.add('active');  
-        document.getElementById(`nav-${id}`).classList.add('nav-active');  
-        if (id === 'tasks') renderTasks();  
-        if (id === 'stats') { syncDailyHistory(state.date); initGraph(); }  
-    }  
+    function showSection(id) {
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('nav-active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById(`nav-${id}`).classList.add('nav-active');
+        if (id === 'tasks') renderTasks();
+        if (id === 'stats') initGraph();
+    }
 
-    function toggleInput() { document.getElementById('input-container').classList.toggle('hidden'); }  
-      
-    function addTask() {  
-        const input = document.getElementById('task-input');  
-        if (input.value.trim()) {  
-            state.tasks.push({ id: Date.now(), text: input.value.trim(), done: false });  
-            input.value = ''; toggleInput(); syncDailyHistory(state.date); renderTasks(); updateUI();  
-        }  
-    }  
+    function toggleInput() { document.getElementById('input-container').classList.toggle('hidden'); }
+    
+    function addTask() {
+        const input = document.getElementById('task-input');
+        if (input.value.trim()) {
+            state.tasks.push({ id: Date.now(), text: input.value.trim(), done: false });
+            input.value = ''; toggleInput(); renderTasks(); updateUI();
+        }
+    }
 
-    function toggleTask(id) {  
-        state.tasks = state.tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);  
-        syncDailyHistory(state.date); renderTasks(); updateUI();  
-    }  
+    function toggleTask(id) {
+        state.tasks = state.tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
+        renderTasks(); updateUI();
+    }
 
-    function deleteTask(id) {  
-        state.tasks = state.tasks.filter(t => t.id !== id);  
-        syncDailyHistory(state.date); renderTasks(); updateUI();  
-    }  
+    function deleteTask(id) {
+        state.tasks = state.tasks.filter(t => t.id !== id);
+        renderTasks(); updateUI();
+    }
 
-    function renderTasks() {  
-        const container = document.getElementById('task-list');  
-        if (!state.tasks.length) { container.innerHTML = `<p class="text-center py-10 text-slate-600 text-[10px] uppercase font-bold tracking-widest">No Missions Set</p>`; return; }  
-        container.innerHTML = state.tasks.map(t => `  
-            <div class="glass-card p-4 flex items-center justify-between">  
-                <div class="flex items-center gap-3">  
-                    <button onclick="toggleTask(${t.id})" class="w-6 h-6 rounded-lg border-2 flex items-center justify-center ${t.done ? 'bg-sky-500 border-sky-500' : 'border-slate-700'}">  
-                        ${t.done ? '<i class="fas fa-check text-[10px] text-white"></i>' : ''}  
-                    </button>  
-                    <span class="text-sm ${t.done ? 'line-through text-slate-600' : 'text-slate-200'}">${t.text}</span>  
-                </div>  
-                <button onclick="deleteTask(${t.id})" class="text-slate-700 hover:text-rose-500"><i class="fas fa-trash-alt"></i></button>  
-            </div>  
-        `).join('');  
-    }  
+    function renderTasks() {
+        const container = document.getElementById('task-list');
+        if (!state.tasks.length) { container.innerHTML = `<p class="text-center py-10 text-slate-600 text-[10px] uppercase font-bold tracking-widest">No Missions Set</p>`; return; }
+        container.innerHTML = state.tasks.map(t => `
+            <div class="glass-card p-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleTask(${t.id})" class="w-6 h-6 rounded-lg border-2 flex items-center justify-center ${t.done ? 'bg-sky-500 border-sky-500' : 'border-slate-700'}">
+                        ${t.done ? '<i class="fas fa-check text-[10px] text-white"></i>' : ''}
+                    </button>
+                    <span class="text-sm ${t.done ? 'line-through text-slate-600' : 'text-slate-200'}">${t.text}</span>
+                </div>
+                <button onclick="deleteTask(${t.id})" class="text-slate-700 hover:text-rose-500"><i class="fas fa-trash-alt"></i></button>
+            </div>
+        `).join('');
+    }
 
-    function initGraph() {  
-        graphDates = [];  
-        for (let i = 29; i >= 0; i--) {  
-            const d = new Date(); d.setDate(d.getDate() - i);  
-            graphDates.push(d.toDateString());  
-        }  
-        renderGraph();  
-        updateSelectedDay(29);  
-    }  
+    function initGraph() {
+        graphDates = [];
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date(); d.setDate(d.getDate() - i);
+            graphDates.push(d.toDateString());
+        }
+        renderGraph();
+        updateSelectedDay(29);
+    }
 
-    function renderGraph() {  
-        const container = document.getElementById('study-graph');  
-        container.innerHTML = '';  
-        const values = graphDates.map(d => state.dailyHistory[d]?.minutes || 0);  
-        const maxVal = Math.max(...values, 60);  
-          
-        graphDates.forEach((date, i) => {  
-            const wrapper = document.createElement('div');  
-            wrapper.className = 'chart-bar-wrapper';  
-            const bar = document.createElement('div');  
-            bar.id = `bar-${i}`;  
-            bar.className = `chart-bar ${date === state.date ? 'active' : ''}`;  
-            bar.style.height = `${Math.min((values[i] / maxVal) * 100, 100)}%`;  
-            bar.onclick = () => { document.getElementById('graph-slider').value = i; updateSelectedDay(i); };  
-            wrapper.appendChild(bar);  
-            container.appendChild(wrapper);  
-        });  
-    }  
+    function renderGraph() {
+        const container = document.getElementById('study-graph');
+        container.innerHTML = '';
+        // আজকের ডেটার জন্য লাইভ ভ্যালু দেখাবে, অন্যদের জন্য স্ন্যাপশট
+        const values = graphDates.map(d => (d === state.date ? state.totalFocusedMinutes : (state.dailyHistory[d]?.minutes || 0)));
+        const maxVal = Math.max(...values, 60);
+        graphDates.forEach((date, i) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'chart-bar-wrapper';
+            const bar = document.createElement('div');
+            bar.id = `bar-${i}`;
+            bar.className = `chart-bar ${date === state.date ? 'active' : ''}`;
+            bar.style.height = `${Math.min((values[i] / maxVal) * 100, 100)}%`;
+            bar.onclick = () => { document.getElementById('graph-slider').value = i; updateSelectedDay(i); };
+            wrapper.appendChild(bar);
+            container.appendChild(wrapper);
+        });
+    }
 
-    document.getElementById('graph-slider').addEventListener('input', (e) => {  
-        updateSelectedDay(parseInt(e.target.value));  
-    });  
+    function updateSelectedDay(idx) {
+        selectedIdx = idx;
+        const dateStr = graphDates[idx];
+        const isToday = dateStr === state.date;
+        const data = isToday ? { minutes: state.totalFocusedMinutes } : state.dailyHistory[dateStr];
+        document.querySelectorAll('.chart-bar').forEach(b => b.classList.remove('highlighted'));
+        const bar = document.getElementById(`bar-${idx}`);
+        if(bar) bar.classList.add('highlighted');
+        document.getElementById('selected-date-label').innerText = isToday ? "Today" : new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        document.getElementById('selected-time-val').innerText = data ? `${Math.floor(data.minutes / 60)}h ${data.minutes % 60}m` : "0h 0m";
+    }
 
-    function updateSelectedDay(idx) {  
-        selectedIdx = idx;  
-        const dateStr = graphDates[idx];  
-        const isToday = dateStr === state.date;  
-        const data = state.dailyHistory[dateStr];  
-        document.querySelectorAll('.chart-bar').forEach(b => b.classList.remove('highlighted'));  
-        const bar = document.getElementById(`bar-${idx}`);  
-        if(bar) bar.classList.add('highlighted');  
-        document.getElementById('selected-date-label').innerText = isToday ? "Today" : new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });  
-        document.getElementById('selected-time-val').innerText = data ? `${Math.floor(data.minutes / 60)}h ${data.minutes % 60}m` : "0h 0m";  
-    }  
+    function openFullStats() {
+        const date = graphDates[selectedIdx];
+        const isToday = (date === state.date);
+        // আজকের জন্য লাইভ টাস্ক লিস্ট, পুরানো দিনের জন্য সেভ করা স্ন্যাপশট
+        const data = isToday ? {
+            minutes: state.totalFocusedMinutes,
+            completedMissions: state.tasks.filter(t => t.done).map(t => t.text),
+            pendingMissions: state.tasks.filter(t => !t.done).map(t => t.text)
+        } : state.dailyHistory[date];
 
-    function openFullStats() {  
-        const date = graphDates[selectedIdx];  
-        const data = state.dailyHistory[date];  
-        document.getElementById('modal-date').innerText = (date === state.date) ? "Today" : new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });  
-        const completed = data?.completedMissions || [];  
-        const incomplete = data?.pendingMissions || [];  
-        document.getElementById('modal-body-content').innerHTML = `  
-            <div class="flex items-center gap-4 bg-slate-900/50 p-4 rounded-2xl border border-slate-800">  
-                <div class="w-12 h-12 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-500"><i class="fas fa-clock"></i></div>  
-                <div>  
-                    <p class="text-[10px] text-slate-500 uppercase font-bold">Total Focused</p>  
-                    <p class="text-xl font-black text-white">${data ? Math.floor(data.minutes / 60)+'h '+(data.minutes % 60)+'m' : '0h 0m'}</p>  
-                </div>  
-            </div>  
-            <div class="space-y-3">  
-                <p class="text-[10px] text-emerald-500 uppercase font-bold" style="color: #10b981;">Completed Missions</p>  
-                <div class="max-h-24 overflow-y-auto space-y-2 pr-2 text-xs text-emerald-200">  
-                    ${completed.length ? completed.map(m => `<div class="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/30">✓ ${m}</div>`).join('') : "<div class='text-slate-600 italic'>None</div>"}  
-                </div>  
-            </div>  
-            <div class="space-y-3 border-t border-slate-800 pt-4">  
-                <p class="text-[10px] text-rose-500 uppercase font-bold" style="color: #f43f5e;">Incomplete Missions</p>  
-                <div class="max-h-24 overflow-y-auto space-y-2 pr-2 text-xs text-rose-300">  
-                    ${incomplete.length ? incomplete.map(m => `<div class="bg-rose-500/10 p-2 rounded-lg border border-rose-500/30">✕ ${m}</div>`).join('') : "<div class='text-slate-600 italic'>None</div>"}  
-                </div>  
-            </div>  
-        `;  
-        document.getElementById('stats-modal').style.display = 'flex';  
-    }  
+        document.getElementById('modal-date').innerText = isToday ? "Today" : new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        const completed = data?.completedMissions || [];
+        const incomplete = data?.pendingMissions || [];
 
-    function closeStatsModal() { document.getElementById('stats-modal').style.display = 'none'; }  
-      
-    function toggleMute() {  
-        state.isMuted = !state.isMuted;  
-        updateUI();  
-    }  
+        document.getElementById('modal-body-content').innerHTML = `
+            <div class="flex items-center gap-4 bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+                <div class="w-12 h-12 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-500"><i class="fas fa-clock"></i></div>
+                <div>
+                    <p class="text-[10px] text-slate-500 uppercase font-bold">Total Focused</p>
+                    <p class="text-xl font-black text-white">${data ? Math.floor(data.minutes / 60)+'h '+(data.minutes % 60)+'m' : '0h 0m'}</p>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <p class="text-[10px] text-emerald-500 uppercase font-bold">Completed Missions</p>
+                <div class="max-h-24 overflow-y-auto space-y-2 pr-2 text-xs text-emerald-200">
+                    ${completed.length ? completed.map(m => `<div class="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/30">✓ ${m}</div>`).join('') : "<div class='text-slate-600 italic'>None</div>"}
+                </div>
+            </div>
+            <div class="space-y-3 border-t border-slate-800 pt-4">
+                <p class="text-[10px] text-rose-500 uppercase font-bold">Incomplete Missions</p>
+                <div class="max-h-24 overflow-y-auto space-y-2 pr-2 text-xs text-rose-300">
+                    ${incomplete.length ? incomplete.map(m => `<div class="bg-rose-500/10 p-2 rounded-lg border border-rose-500/30">✕ ${m}</div>`).join('') : "<div class='text-slate-600 italic'>None</div>"}
+                </div>
+            </div>
+        `;
+        document.getElementById('stats-modal').style.display = 'flex';
+    }
 
-    window.onload = () => {
-  checkDayTransition();
+    function closeStatsModal() { document.getElementById('stats-modal').style.display = 'none'; }
+    function openSettingsModal() { 
+        document.getElementById('study-min-input').value = SETTINGS.studyMinutes;
+        document.getElementById('break-min-input').value = SETTINGS.breakMinutes;
+        document.getElementById('settings-modal').style.display = 'flex'; 
+    }
+    function closeSettingsModal() { document.getElementById('settings-modal').style.display = 'none'; }
+    function saveSettings() {
+        const sm = parseInt(document.getElementById('study-min-input').value);
+        const bm = parseInt(document.getElementById('break-min-input').value);
+        if (sm > 0 && bm > 0) { SETTINGS.studyMinutes = sm; SETTINGS.breakMinutes = bm; saveState(); resetTimer(); closeSettingsModal(); }
+    }
+    function toggleMute() { state.isMuted = !state.isMuted; updateUI(); }
 
-  const savedTimer = JSON.parse(localStorage.getItem('ssc26_timer'));
-  if (savedTimer && savedTimer.isRunning && savedTimer.endTime) {
-    timer.endTime = savedTimer.endTime;
-    timer.isRunning = true;
-    timer.mode = savedTimer.mode;
-    timer.extraMinutes = savedTimer.extraMinutes || 0;
+    window.onload = checkDayTransition;
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) checkDayTransition(); });
+    document.getElementById('graph-slider').addEventListener('input', (e) => updateSelectedDay(parseInt(e.target.value)));
 
-    const remaining = Math.ceil((timer.endTime - Date.now()) / 1000);
-    timer.duration = Math.max(0, remaining);
-      if (isNaN(timer.duration) || timer.duration <= 0) {
-    timer.duration = timer.mode === 'study'
-        ? SETTINGS.studyMinutes * 60
-        : SETTINGS.breakMinutes * 60;
-}
-
-    requestAnimationFrame(tick);
-  }
-};    
-
-    document.addEventListener('visibilitychange', () => {   
-  if (!document.hidden && timer.isRunning) {  
-    checkDayTransition();  
-  }  
-});  
 </script>
-
 </body>  
-    </html>
+</html>
+
